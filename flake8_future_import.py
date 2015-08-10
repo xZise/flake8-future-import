@@ -10,7 +10,7 @@ except ImportError as e:
 
 from ast import NodeVisitor, PyCF_ONLY_AST
 
-__version__ = '0.2'
+__version__ = '0.2.1'
 
 
 class FutureImportVisitor(NodeVisitor):
@@ -32,7 +32,7 @@ class FutureImportChecker(object):
                          'print_function', 'unicode_literals')
 
     version = __version__
-    name = 'future-imports'
+    name = 'flake8-future-import'
 
     def __init__(self, tree, filename):
         self.tree = tree

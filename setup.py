@@ -24,9 +24,9 @@ setup(
     keywords='flake8 import future',
     maintainer='Fabian Neundorf',
     maintainer_email='CommodoreFabianus@gmx.de',
-    url='https://github.com/xZise/flake8-import',
+    url='https://github.com/xZise/flake8-future-import',
     license='MIT License',
-    py_modules=['flake8_import'],
+    py_modules=['flake8_future_import'],
     zip_safe=False,
     entry_points={
         'flake8.extension': [
