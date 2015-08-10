@@ -9,3 +9,7 @@ python:
 script: python setup.py test
 notifications:
   email: false
+before_install:
+  - pip install codecov
+after_success:
+  - codecov
