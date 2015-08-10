@@ -10,7 +10,7 @@ except ImportError as e:
 
 from ast import NodeVisitor, PyCF_ONLY_AST
 
-__version__ = '0.3.dev0'
+__version__ = '0.3.dev1'
 
 
 class FutureImportVisitor(NodeVisitor):
@@ -70,7 +70,7 @@ def main(args):
     parser.add_argument('--ignore', help='Ignore the given comma-separated '
                                          'codes')
     parser.add_argument('files', nargs='+')
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     if args.ignore:
         ignored = set(args.ignore.split(','))
         unrecognized = ignored - choices
