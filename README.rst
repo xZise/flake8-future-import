@@ -31,7 +31,7 @@ When both ``flake8 2.0`` and ``flake8-future-imports`` are installed, the plugin
 is available in ``flake8``::
 
   $ flake8 --version
-  2.0 (pep8: 1.4.2, flake8-future-imports: 0.2.1, pyflakes: 0.6.1)
+  2.0 (pep8: 1.4.2, flake8-future-imports: 0.3.dev0, pyflakes: 0.6.1)
 
 By default the plugin will check for all the future imports but with
 ``--ignore`` it's possible to define which imports from ``__future__`` are

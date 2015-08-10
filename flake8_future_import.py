@@ -10,7 +10,7 @@ except ImportError as e:
 
 from ast import NodeVisitor, PyCF_ONLY_AST
 
-__version__ = '0.3'
+__version__ = '0.3.dev0'
 
 
 class FutureImportVisitor(NodeVisitor):
