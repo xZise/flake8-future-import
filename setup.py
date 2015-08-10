@@ -22,6 +22,7 @@ setup(
     description='__future__ import checker, plugin for flake8',
     long_description=get_long_description(),
     keywords='flake8 import future',
+    install_requires=['flake8'],
     maintainer='Fabian Neundorf',
     maintainer_email='CommodoreFabianus@gmx.de',
     url='https://github.com/xZise/flake8-future-import',
@@ -33,6 +34,8 @@ setup(
             'flake8-future-import = flake8_future_import:FutureImportChecker',
         ],
     },
+    test_require=['flake8'],
+    test_suite='test_flake8_future_import',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',
