@@ -1,6 +1,10 @@
 __future__ import checker
 =========================
 
+.. image:: https://secure.travis-ci.org/xZise/flake8-future-import.png?branch=master
+   :alt: Build Status
+   :target: https://travis-ci.org/xZise/flake8-future-import
+
 A script to check for the imported __future__ modules to make it easier to have
 a consistent code base.
 
