@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Extension for flake8 to test for certain __future__ imports"""
+from __future__ import print_function
+
 import sys
 
 try:
