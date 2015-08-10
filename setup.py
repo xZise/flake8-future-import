@@ -5,7 +5,7 @@ from setuptools import setup
 
 
 def get_version():
-    with open('flake8_import.py') as f:
+    with open('flake8_future_import.py') as f:
         for line in f:
             if line.startswith('__version__'):
                 return eval(line.split('=')[-1])
@@ -17,7 +17,7 @@ def get_long_description():
 
 
 setup(
-    name='flake8-import',
+    name='flake8-future-import',
     version=get_version(),
     description='__future__ import checker, plugin for flake8',
     long_description=get_long_description(),
@@ -30,7 +30,7 @@ setup(
     zip_safe=False,
     entry_points={
         'flake8.extension': [
-            'flake8_import = flake8_import:FutureImportChecker',
+            'flake8-future-import = flake8_future_import:FutureImportChecker',
         ],
     },
     classifiers=[
