@@ -4,10 +4,10 @@ __future__ import checker
 A script to check for the imported __future__ modules to make it easier to have
 a consistent code base.
 
-By default it requires all imports but it's possible to have certain imports
-optional by ignoring their error code. In the future it's planned to have a
-“consistency” mode and to forbid certain imports (by ignoring the even error
-codes).
+By default it requires and forbids all imports but it's possible to have
+certain imports optional by ignoring both their requiring and forbidding error
+code. In the future it's planned to have a “consistency” mode and that the
+default is having the import optional or required (not sure on that yet).
 
 This module provides a plugin for ``flake8``, the Python code checker.
 
@@ -17,8 +17,8 @@ Standalone script
 
 The checker can be used directly::
 
-  $ python -m flake8-import --ignore I301,I303,I305,I307,I309,I311 some_file.py
-  some_file.py:0:1: I313 __future__ import "unicode_literals" missing
+  $ python -m flake8-import --ignore FI10,FI11,FI12,FI13,FI15,FI5 some_file.py
+  some_file.py:0:1: FI14 __future__ import "unicode_literals" missing
 
 Even though ``flake8`` still uses ``optparse`` this script in standalone mode
 is using ``argparse``.
@@ -35,11 +35,12 @@ is available in ``flake8``::
 
 By default the plugin will check for all the future imports but with
 ``--ignore`` it's possible to define which imports from ``__future__`` are
-optional. It will emit a warning if necessary imports are missing::
+optional, required or forbidden. It will emit a warning if necessary imports
+are missing::
 
-  $ flake8 --ignore I301,I303,I305,I307,I309,I311 some_file.py
+  $ flake8 --ignore FI10,FI11,FI12,FI13,FI15,FI5 some_file.py
   ...
-  some_file.py:0:1: I313 __future__ import "unicode_literals" missing
+  some_file.py:0:1: FI14 __future__ import "unicode_literals" missing
 
 
 Error codes
@@ -48,24 +49,50 @@ Error codes
 This plugin is using the following error codes:
 
 +------+----------------------------------------------+
-| I301 | __future__ import "nested_scopes" missing    |
+| FI10 | __future__ import "division" missing         |
 +------+----------------------------------------------+
-| I303 | __future__ import "generators" missing       |
+| FI11 | __future__ import "absolute_import" missing  |
 +------+----------------------------------------------+
-| I305 | __future__ import "division" missing         |
+| FI12 | __future__ import "with_statement" missing   |
 +------+----------------------------------------------+
-| I307 | __future__ import "absolute_import" missing  |
+| FI13 | __future__ import "print_function" missing   |
 +------+----------------------------------------------+
-| I309 | __future__ import "with_statement" missing   |
+| FI14 | __future__ import "unicode_literals" missing |
 +------+----------------------------------------------+
-| I311 | __future__ import "print_function" missing   |
+| FI15 | __future__ import "generator_stop" missing   |
 +------+----------------------------------------------+
-| I313 | __future__ import "unicode_literals" missing |
 +------+----------------------------------------------+
+| FI50 | __future__ import "division" missing         |
++------+----------------------------------------------+
+| FI51 | __future__ import "absolute_import" missing  |
++------+----------------------------------------------+
+| FI52 | __future__ import "with_statement" missing   |
++------+----------------------------------------------+
+| FI53 | __future__ import "print_function" missing   |
++------+----------------------------------------------+
+| FI54 | __future__ import "unicode_literals" missing |
++------+----------------------------------------------+
+| FI55 | __future__ import "generator_stop" missing   |
++------+----------------------------------------------+
+
+For a sensible usage, for each import either or both error code need to be
+ignored as it will otherwise always complain either because it's present or
+because it is not. The corresponding other error code can be determined by
+adding or substracting 40.
+
+* Ignoring the **lower** one will **forbid** the import
+* Ignoring the **highr** one will **require** the import
+* Ignoring **both** will make the import **optional**
 
 
 Changes
 -------
+
+0.3 - 2015-08-10
+````````````````
+* Using a different error code namespace (FIXX)
+* Add error codes returned when an import is present
+* Removed ``nested_scopes`` and ``generators`` from the available list
 
 0.2.1 - 2015-08-10
 ````````````````
