@@ -5,6 +5,9 @@ __future__ import checker
    :alt: Build Status
    :target: https://travis-ci.org/xZise/flake8-future-import
 
+.. image:: https://badge.fury.io/py/flake8-future-import.svg
+   :target: https://pypi.python.org/pypi/flake8-future-import
+
 A script to check for the imported ``__future__`` modules to make it easier to
 have a consistent code base.
 
