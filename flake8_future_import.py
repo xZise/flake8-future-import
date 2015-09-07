@@ -10,9 +10,9 @@ try:
 except ImportError as e:
     argparse = e
 
-from ast import NodeVisitor, PyCF_ONLY_AST
+from ast import NodeVisitor, PyCF_ONLY_AST, Str, Module
 
-__version__ = '0.3.dev1'
+__version__ = '0.3.dev6'
 
 
 class FutureImportVisitor(NodeVisitor):
@@ -20,13 +20,42 @@ class FutureImportVisitor(NodeVisitor):
     def __init__(self):
         super(FutureImportVisitor, self).__init__()
         self.future_imports = []
+        self._uses_code = False
 
     def visit_ImportFrom(self, node):
         if node.module == '__future__':
             self.future_imports += [node]
 
+    def visit_Expr(self, node):
+        if not isinstance(node.value, Str) or node.value.col_offset != 0:
+            self._uses_code = True
 
-class FutureImportChecker(object):
+    def generic_visit(self, node):
+        if not isinstance(node, Module):
+            self._uses_code = True
+        super(FutureImportVisitor, self).generic_visit(node)
+
+    @property
+    def uses_code(self):
+        return self._uses_code or self.future_imports
+
+
+class Flake8Argparse(object):
+
+    @classmethod
+    def add_options(cls, parser):
+        class Wrapper(object):
+            def add_argument(self, *args, **kwargs):
+                parser.add_option(*args, **kwargs)
+
+        cls.add_arguments(Wrapper())
+
+    @classmethod
+    def add_arguments(cls, parser):
+        pass
+
+
+class FutureImportChecker(Flake8Argparse):
 
     # Order important as it defines the error code
     AVAILABLE_IMPORTS = ('division', 'absolute_import', 'with_statement',
@@ -34,9 +63,20 @@ class FutureImportChecker(object):
 
     version = __version__
     name = 'flake8-future-import'
+    require_code = True
 
     def __init__(self, tree, filename):
         self.tree = tree
+
+    @classmethod
+    def add_arguments(cls, parser):
+        parser.add_argument('--require-code', action='store_true',
+                            help='Do only apply to files which not only have '
+                                 'comments and (doc)strings')
+
+    @classmethod
+    def parse_options(cls, options):
+        cls.require_code = options.require_code
 
     def _generate_error(self, future_import, lineno, present):
         code = 10 + self.AVAILABLE_IMPORTS.index(future_import)
@@ -50,6 +90,8 @@ class FutureImportChecker(object):
     def run(self):
         visitor = FutureImportVisitor()
         visitor.visit(self.tree)
+        if not self.require_code and not visitor.uses_code:
+            return
         present = set()
         for import_node in visitor.future_imports:
             for alias in import_node.names:
@@ -71,8 +113,10 @@ def main(args):
                    range(len(FutureImportChecker.AVAILABLE_IMPORTS)))
     parser.add_argument('--ignore', help='Ignore the given comma-separated '
                                          'codes')
+    FutureImportChecker.add_arguments(parser)
     parser.add_argument('files', nargs='+')
     args = parser.parse_args(args)
+    FutureImportChecker.parse_options(args)
     if args.ignore:
         ignored = set(args.ignore.split(','))
         unrecognized = ignored - choices

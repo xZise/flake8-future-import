@@ -47,6 +47,17 @@ are missing::
   some_file.py:0:1: FI14 __future__ import "unicode_literals" missing
 
 
+Parameters
+----------
+
+This module adds one parameter:
+
+* ``--require-code``: Doesn't complain on files which only contain comments or
+  strings (and by extension docstrings).
+
+The stand alone version also mimics flake8's ignore parameter.
+
+
 Error codes
 -----------
 
@@ -92,11 +103,12 @@ adding or substracting 40.
 Changes
 -------
 
-0.3 - 2015-08-10
+0.3 - 2015-09-07
 ````````````````
 * Using a different error code namespace (FIXX)
 * Add error codes returned when an import is present
 * Removed ``nested_scopes`` and ``generators`` from the available list
+* Skip files which only contains comments and strings
 
 0.2.1 - 2015-08-10
 ````````````````
