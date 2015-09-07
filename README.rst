@@ -102,6 +102,11 @@ adding or substracting 40.
 * Ignoring the **higher** one will **require** the import
 * Ignoring **both** will make the import **optional**
 
+The plugin is always producing errors about missing and present imports and
+``flake8`` actually does ignore then the codes accordingly. So the plugin does
+not know that an import is allowed and forbidden at the same time and thus
+cannot skip reporting those imports.
+
 
 Changes
 -------
