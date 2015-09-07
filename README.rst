@@ -5,8 +5,8 @@ __future__ import checker
    :alt: Build Status
    :target: https://travis-ci.org/xZise/flake8-future-import
 
-A script to check for the imported __future__ modules to make it easier to have
-a consistent code base.
+A script to check for the imported ``__future__`` modules to make it easier to
+have a consistent code base.
 
 By default it requires and forbids all imports but it's possible to have
 certain imports optional by ignoring both their requiring and forbidding error
@@ -63,32 +63,32 @@ Error codes
 
 This plugin is using the following error codes:
 
-+------+----------------------------------------------+
-| FI10 | __future__ import "division" missing         |
-+------+----------------------------------------------+
-| FI11 | __future__ import "absolute_import" missing  |
-+------+----------------------------------------------+
-| FI12 | __future__ import "with_statement" missing   |
-+------+----------------------------------------------+
-| FI13 | __future__ import "print_function" missing   |
-+------+----------------------------------------------+
-| FI14 | __future__ import "unicode_literals" missing |
-+------+----------------------------------------------+
-| FI15 | __future__ import "generator_stop" missing   |
-+------+----------------------------------------------+
-+------+----------------------------------------------+
-| FI50 | __future__ import "division" missing         |
-+------+----------------------------------------------+
-| FI51 | __future__ import "absolute_import" missing  |
-+------+----------------------------------------------+
-| FI52 | __future__ import "with_statement" missing   |
-+------+----------------------------------------------+
-| FI53 | __future__ import "print_function" missing   |
-+------+----------------------------------------------+
-| FI54 | __future__ import "unicode_literals" missing |
-+------+----------------------------------------------+
-| FI55 | __future__ import "generator_stop" missing   |
-+------+----------------------------------------------+
++------+--------------------------------------------------+
+| FI10 | ``__future__`` import "division" missing         |
++------+--------------------------------------------------+
+| FI11 | ``__future__`` import "absolute_import" missing  |
++------+--------------------------------------------------+
+| FI12 | ``__future__`` import "with_statement" missing   |
++------+--------------------------------------------------+
+| FI13 | ``__future__`` import "print_function" missing   |
++------+--------------------------------------------------+
+| FI14 | ``__future__`` import "unicode_literals" missing |
++------+--------------------------------------------------+
+| FI15 | ``__future__`` import "generator_stop" missing   |
++------+--------------------------------------------------+
++------+--------------------------------------------------+
+| FI50 | ``__future__`` import "division" missing         |
++------+--------------------------------------------------+
+| FI51 | ``__future__`` import "absolute_import" missing  |
++------+--------------------------------------------------+
+| FI52 | ``__future__`` import "with_statement" missing   |
++------+--------------------------------------------------+
+| FI53 | ``__future__`` import "print_function" missing   |
++------+--------------------------------------------------+
+| FI54 | ``__future__`` import "unicode_literals" missing |
++------+--------------------------------------------------+
+| FI55 | ``__future__`` import "generator_stop" missing   |
++------+--------------------------------------------------+
 
 For a sensible usage, for each import either or both error code need to be
 ignored as it will otherwise always complain either because it's present or
@@ -96,22 +96,22 @@ because it is not. The corresponding other error code can be determined by
 adding or substracting 40.
 
 * Ignoring the **lower** one will **forbid** the import
-* Ignoring the **highr** one will **require** the import
+* Ignoring the **higher** one will **require** the import
 * Ignoring **both** will make the import **optional**
 
 
 Changes
 -------
 
-0.3 - 2015-09-07
-````````````````
+0.3.0 - 2015-09-07
+``````````````````
 * Using a different error code namespace (FIXX)
 * Add error codes returned when an import is present
 * Removed ``nested_scopes`` and ``generators`` from the available list
 * Skip files which only contains comments and strings
 
 0.2.1 - 2015-08-10
-````````````````
+``````````````````
 * Fixed the module and URL in setup.py
 * Fixed the name in the script itself
 
