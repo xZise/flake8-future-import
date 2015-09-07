@@ -12,7 +12,7 @@ except ImportError as e:
 
 from ast import NodeVisitor, PyCF_ONLY_AST, Str, Module
 
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 
 
 class FutureImportVisitor(NodeVisitor):
@@ -46,6 +46,14 @@ class Flake8Argparse(object):
     def add_options(cls, parser):
         class Wrapper(object):
             def add_argument(self, *args, **kwargs):
+                # flake8 uses config_options to handle stuff like 'store_true'
+                if kwargs['action'] == 'store_true':
+                    for opt in args:
+                        if opt.startswith('--'):
+                            break
+                    else:
+                        opt = args[0]
+                    parser.config_options.append(opt.lstrip('-'))
                 parser.add_option(*args, **kwargs)
 
         cls.add_arguments(Wrapper())

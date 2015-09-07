@@ -56,7 +56,8 @@ Parameters
 This module adds one parameter:
 
 * ``--require-code``: Doesn't complain on files which only contain comments or
-  strings (and by extension docstrings).
+  strings (and by extension docstrings). Corresponds to ``require-code = True``
+  in the ``tox.ini``.
 
 The stand alone version also mimics flake8's ignore parameter.
 
@@ -110,6 +111,10 @@ cannot skip reporting those imports.
 
 Changes
 -------
+
+0.3.1 - 2015-09-07
+``````````````````
+* Support setting ``--require-code`` in the ``tox.ini``
 
 0.3.0 - 2015-09-07
 ``````````````````
