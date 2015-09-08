@@ -8,7 +8,8 @@ python:
 
 script:
   - python setup.py test
-  - coverage run setup.py test
+  - if [[ "$TRAVIS_PYTHON_VERSION" != "nightly" ]]; then coverage run setup.py test ; fi
+
 notifications:
   email: false
 before_install:
