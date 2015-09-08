@@ -5,7 +5,12 @@ __future__ import checker
    :alt: Build Status
    :target: https://travis-ci.org/xZise/flake8-future-import
 
+.. image:: http://codecov.io/github/xZise/flake8-future-import/coverage.svg?branch=master
+   :alt: Coverage Status
+   :target: http://codecov.io/github/xZise/flake8-future-import?branch=master
+
 .. image:: https://badge.fury.io/py/flake8-future-import.svg
+   :alt: Pypi Entry
    :target: https://pypi.python.org/pypi/flake8-future-import
 
 A script to check for the imported ``__future__`` modules to make it easier to
@@ -25,7 +30,7 @@ Standalone script
 The checker can be used directly::
 
   $ python -m flake8-import --ignore FI10,FI11,FI12,FI13,FI15,FI5 some_file.py
-  some_file.py:0:1: FI14 __future__ import "unicode_literals" missing
+  some_file.py:1:1: FI14 __future__ import "unicode_literals" missing
 
 Even though ``flake8`` still uses ``optparse`` this script in standalone mode
 is using ``argparse``.
@@ -47,7 +52,7 @@ are missing::
 
   $ flake8 --ignore FI10,FI11,FI12,FI13,FI15,FI5 some_file.py
   ...
-  some_file.py:0:1: FI14 __future__ import "unicode_literals" missing
+  some_file.py:1:1: FI14 __future__ import "unicode_literals" missing
 
 
 Parameters
