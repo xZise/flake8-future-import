@@ -34,7 +34,7 @@ setup(
             'flake8-future-import = flake8_future_import:FutureImportChecker',
         ],
     },
-    test_require=['flake8'],
+    tests_require=['six'],
     test_suite='test_flake8_future_import',
     classifiers=[
         'Development Status :: 3 - Alpha',

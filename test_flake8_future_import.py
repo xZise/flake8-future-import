@@ -8,7 +8,11 @@ import re
 import tempfile
 import unittest
 
+import six
+
 import flake8_future_import
+
+all_available = set(flake8_future_import.FutureImportChecker.AVAILABLE_IMPORTS)
 
 
 def generate_code(*imported):
@@ -25,13 +29,7 @@ def generate_code(*imported):
 
 class TestCaseBase(unittest.TestCase):
 
-    def run_test(self, iterator, *imported):
-        imported = set(itertools.chain(*imported))
-        missing = set(flake8_future_import
-                      .FutureImportChecker.AVAILABLE_IMPORTS) - imported
-        invalid = imported - set(flake8_future_import
-                                 .FutureImportChecker.AVAILABLE_IMPORTS)
-        imported -= invalid
+    def check_result(self, iterator):
         found_missing = set()
         found_forbidden = set()
         for line, msg in iterator:
@@ -49,24 +47,33 @@ class TestCaseBase(unittest.TestCase):
                 self.assertEqual(line, 1)
             else:
                 found_forbidden.add(imp)
+        self.assertFalse(found_missing & found_forbidden)
+        self.assertFalse(found_missing - all_available)
+        self.assertFalse(found_forbidden - all_available)
+        return found_missing, found_forbidden
+
+    def run_test(self, iterator, *imported):
+        imported = set(itertools.chain(*imported))
+        missing = set(flake8_future_import
+                      .FutureImportChecker.AVAILABLE_IMPORTS) - imported
+        imported &= all_available
+        found_missing, found_forbidden = self.check_result(iterator)
         self.assertEqual(found_missing, missing)
         self.assertEqual(found_forbidden, imported - missing)
-        self.assertFalse(found_missing & invalid)
-        self.assertFalse(found_forbidden & invalid)
+
+    def iterator(self, checker):
+        for line, char, msg, origin in checker.run():
+            yield line, msg
+            self.assertEqual(char, 0)
+            self.assertIs(origin, flake8_future_import.FutureImportChecker)
 
 
 class SimpleImportTestCase(TestCaseBase):
 
     def run_checker(self, *imported):
-        def iterator():
-            for line, char, msg, origin in checker.run():
-                yield line, msg
-                self.assertEqual(char, 0)
-                self.assertIs(origin, flake8_future_import.FutureImportChecker)
-
         tree = ast.parse(generate_code(*imported))
         checker = flake8_future_import.FutureImportChecker(tree, 'fn')
-        self.run_test(iterator(), *imported)
+        self.run_test(self.iterator(checker), *imported)
 
     def test_checker(self):
         self.run_checker()
@@ -119,6 +126,46 @@ class TestMainPrintPatched(TestCaseBase):
         self.run_main(['unicode_literals'], ['division'])
         self.run_main(['invalid_code'])
         self.run_main(['invalid_code', 'unicode_literals'])
+
+
+class BadSyntaxMetaClass(type):
+
+    expected_imports = dict((n, set()) for n in range(3, 10))
+    expected_imports[10] = set(['absolute_import', 'print_function'])
+
+    def __new__(cls, name, bases, dct):
+        def create_test(tree, expected):
+            def test(self):
+                checker = flake8_future_import.FutureImportChecker(tree, 'fn')
+                iterator = self.iterator(checker)
+                found_missing, found_forbidden = self.check_result(iterator)
+                self.assertEqual(found_missing, all_available - expected)
+                self.assertEqual(found_forbidden, expected)
+            return test
+
+        files_found = set()
+        for fn in os.listdir(os.path.dirname(os.path.abspath(__file__))):
+            m = re.match('^badsyntax_future(\d+).py$', fn)
+            if m:
+                num = int(m.group(1))
+                if num not in cls.expected_imports:
+                    print('File "{0}" is not expected'.format(fn))
+                with open(fn, 'rb') as f:
+                    tree = compile(f.read(), fn, 'exec', ast.PyCF_ONLY_AST)
+                test = create_test(tree, cls.expected_imports[num])
+                test.__name__ = str('test_badsyntax_{0}'.format(num))
+                dct[test.__name__] = test
+                files_found.add(num)
+
+        for not_found in sorted(set(cls.expected_imports) - files_found):
+            print('File "badsyntax_future{0}" not found.'.format(not_found))
+        return super(BadSyntaxMetaClass, cls).__new__(cls, name, bases, dct)
+
+
+@six.add_metaclass(BadSyntaxMetaClass)
+class BadSyntaxTestCase(TestCaseBase):
+
+    """Test using various bad syntax examples from Python's library."""
 
 
 if __name__ == '__main__':
