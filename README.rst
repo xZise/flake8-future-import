@@ -86,17 +86,17 @@ This plugin is using the following error codes:
 | FI15 | ``__future__`` import "generator_stop" missing   |
 +------+--------------------------------------------------+
 +------+--------------------------------------------------+
-| FI50 | ``__future__`` import "division" missing         |
+| FI50 | ``__future__`` import "division" present         |
 +------+--------------------------------------------------+
-| FI51 | ``__future__`` import "absolute_import" missing  |
+| FI51 | ``__future__`` import "absolute_import" present  |
 +------+--------------------------------------------------+
-| FI52 | ``__future__`` import "with_statement" missing   |
+| FI52 | ``__future__`` import "with_statement" present   |
 +------+--------------------------------------------------+
-| FI53 | ``__future__`` import "print_function" missing   |
+| FI53 | ``__future__`` import "print_function" present   |
 +------+--------------------------------------------------+
-| FI54 | ``__future__`` import "unicode_literals" missing |
+| FI54 | ``__future__`` import "unicode_literals" present |
 +------+--------------------------------------------------+
-| FI55 | ``__future__`` import "generator_stop" missing   |
+| FI55 | ``__future__`` import "generator_stop" present   |
 +------+--------------------------------------------------+
 
 For a sensible usage, for each import either or both error code need to be
