@@ -30,6 +30,9 @@ class TestCaseBase(unittest.TestCase):
         imported = set(itertools.chain(*imported))
         missing = set(flake8_future_import
                       .FutureImportChecker.AVAILABLE_IMPORTS) - imported
+        invalid = imported - set(flake8_future_import
+                                 .FutureImportChecker.AVAILABLE_IMPORTS)
+        imported -= invalid
         found_missing = set()
         found_forbidden = set()
         for line, msg in iterator:
@@ -49,6 +52,8 @@ class TestCaseBase(unittest.TestCase):
                 found_forbidden.add(imp)
         self.assertEqual(found_missing, missing)
         self.assertEqual(found_forbidden, imported - missing)
+        self.assertFalse(found_missing & invalid)
+        self.assertFalse(found_forbidden & invalid)
 
 
 class SimpleImportTestCase(TestCaseBase):
@@ -69,6 +74,8 @@ class SimpleImportTestCase(TestCaseBase):
         self.run_checker(['unicode_literals'])
         self.run_checker(['unicode_literals', 'division'])
         self.run_checker(['unicode_literals'], ['division'])
+        self.run_checker(['invalid_code'])
+        self.run_checker(['invalid_code', 'unicode_literals'])
 
     def test_main_invalid(self):
         self.assertRaises(ValueError, flake8_future_import.main,
@@ -111,6 +118,8 @@ class TestMainPrintPatched(TestCaseBase):
         self.run_main(['unicode_literals'])
         self.run_main(['unicode_literals', 'division'])
         self.run_main(['unicode_literals'], ['division'])
+        self.run_main(['invalid_code'])
+        self.run_main(['invalid_code', 'unicode_literals'])
 
 
 if __name__ == '__main__':

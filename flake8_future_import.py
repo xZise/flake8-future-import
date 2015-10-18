@@ -12,7 +12,7 @@ except ImportError as e:
 
 from ast import NodeVisitor, PyCF_ONLY_AST, Str, Module
 
-__version__ = '0.3.1'
+__version__ = '0.3.2'
 
 
 class FutureImportVisitor(NodeVisitor):
@@ -103,6 +103,9 @@ class FutureImportChecker(Flake8Argparse):
         present = set()
         for import_node in visitor.future_imports:
             for alias in import_node.names:
+                if alias.name not in self.AVAILABLE_IMPORTS:
+                    # unknown code
+                    continue
                 yield self._generate_error(alias.name, import_node.lineno, True)
                 present.add(alias.name)
         for name in self.AVAILABLE_IMPORTS:
