@@ -208,7 +208,7 @@ class Flake8TestCase(TestCaseBase):
     @classmethod
     def tearDownClass(cls):
         if cls._installed:
-            output = subprocess.check_output(['pip', 'uninstall',
+            output = subprocess.check_output(['pip', 'uninstall', '-y',
                                               'flake8-future-import'])
             output = output.decode('utf8')
             print('Uninstalled package:\n\n' + output)
