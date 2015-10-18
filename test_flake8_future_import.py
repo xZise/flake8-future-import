@@ -31,6 +31,14 @@ def generate_code(*imported):
     return code
 
 
+def reverse_parse(lines, tmp_file=None):
+    for line in lines:
+        match = re.match(r'([^:]+):(\d+):1: (.*)', line)
+        yield int(match.group(2)), match.group(3)
+        if tmp_file is not None:
+            self.assertEqual(match.group(1), tmp_file)
+
+
 class TestCaseBase(unittest.TestCase):
 
     def check_result(self, iterator):
@@ -95,8 +103,7 @@ class SimpleImportTestCase(TestCaseBase):
 class TestMainPrintPatched(TestCaseBase):
 
     def patched_print(self, msg):
-        match = re.match(r'([^:]+):(\d+):1: (.*)', msg)
-        self.messages += [match.groups()]
+        self.messages += [msg]
 
     def setUp(self):
         super(TestMainPrintPatched, self).setUp()
@@ -107,10 +114,6 @@ class TestMainPrintPatched(TestCaseBase):
         super(TestMainPrintPatched, self).tearDown()
 
     def run_main(self, *imported):
-        def iterator():
-            for fn, line, msg in self.messages:
-                yield int(line), msg
-                self.assertEqual(fn, tmp_file)
         self.messages = []
         code = generate_code(*imported)
         code = '#!/usr/bin/python\n# -*- coding: utf-8 -*-\n' + code
@@ -121,7 +124,7 @@ class TestMainPrintPatched(TestCaseBase):
             flake8_future_import.main([tmp_file])
         finally:
             os.remove(tmp_file)
-        self.run_test(iterator(), *imported)
+        self.run_test(reverse_parse(self.messages), *imported)
 
     def test_main(self):
         self.run_main()
@@ -172,7 +175,7 @@ class BadSyntaxTestCase(TestCaseBase):
     """Test using various bad syntax examples from Python's library."""
 
 
-class Flake8TestCase(unittest.TestCase):
+class Flake8TestCase(TestCaseBase):
 
     """
     Test this plugin using flake8.
@@ -196,7 +199,6 @@ class Flake8TestCase(unittest.TestCase):
                                                   'develop'])
                 output = output.decode('utf8')
                 print('Installed package:\n\n' + output)
-                raise unittest.SkipTest('Installation not yet implemented')
                 cls._installed = True
             else:
                 raise unittest.SkipTest('The plugin is not installed and '
@@ -212,12 +214,10 @@ class Flake8TestCase(unittest.TestCase):
             print('Uninstalled package:\n\n' + output)
         super(Flake8TestCase, cls).tearDownClass()
 
-    def test_flake8(self):
-        imported = [['unicode_literals']]
+    def run_flake8(self, *imported):
         code = generate_code(*imported)
         code = '#!/usr/bin/python\n# -*- coding: utf-8 -*-\n' + code
         handle, tmp_file = tempfile.mkstemp()
-        print(tmp_file)
         try:
             with codecs.open(tmp_file, 'w', 'utf-8') as f:
                 f.write(code)
@@ -226,11 +226,22 @@ class Flake8TestCase(unittest.TestCase):
             command = ['flake8', tmp_file]
             p = subprocess.Popen(command, env=env, stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE)
-            data_out = p.communicate()
+            data_out, data_err = p.communicate()
         finally:
             os.close(handle)
             os.remove(tmp_file)
-        print(data_out)
+        self.assertFalse(data_err)
+        self.run_test(reverse_parse(data_out.decode('utf8').splitlines()),
+                      *imported)
+        self.assertEqual(p.returncode, 1)
+
+    def test_flake8(self):
+        self.run_flake8()
+        self.run_flake8(['unicode_literals'])
+        self.run_flake8(['unicode_literals', 'division'])
+        self.run_flake8(['unicode_literals'], ['division'])
+        self.run_flake8(['invalid_code'])
+        self.run_flake8(['invalid_code', 'unicode_literals'])
 
 
 if __name__ == '__main__':
