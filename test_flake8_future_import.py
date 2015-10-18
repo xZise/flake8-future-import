@@ -1,12 +1,18 @@
 from __future__ import print_function
 
+import __future__
 import ast
 import codecs
 import itertools
 import os
 import re
+import sys
 import tempfile
-import unittest
+
+if sys.version_info < (2, 7):
+    import unittest2 as unittest
+else:
+    import unittest
 
 import six
 
@@ -179,9 +185,57 @@ class BadSyntaxMetaClass(type):
 
 
 @six.add_metaclass(BadSyntaxMetaClass)
-class BadSyntaxTestCase(TestCaseBase):
+class TestBadSyntax(TestCaseBase):
 
     """Test using various bad syntax examples from Python's library."""
+
+
+class FeaturesMetaClass(type):
+
+    def __new__(cls, name, bases, dct):
+        def create_existing_test(feat_name):
+            def test(self):
+                self.assertIn(feat_name, flake8_future_import.FEATURES)
+                py_feat = getattr(__future__, feat_name)
+                my_feat = flake8_future_import.FEATURES[feat_name]
+                self.assertEqual(my_feat.optional, py_feat.optional[:3])
+                self.assertEqual(my_feat.mandatory, py_feat.mandatory[:3])
+            return test
+
+        def create_to_new_test(feat_name):
+            def test(self):
+                self.assertGreater(
+                    flake8_future_import.FEATURES[feat_name].optional,
+                    sys.version_info[:3])
+
+        for feat in __future__.all_feature_names:
+            if feat == 'barry_as_FLUFL':
+                continue  # thank you April's Foul
+            test = create_existing_test(feat)
+            test.__name__ = str('test_{0}'.format(feat))
+            test.__doc__ = 'Verify the feature versions.'
+            dct[test.__name__] = test
+
+        for missing_feat in (set(flake8_future_import.FEATURES) -
+                             set(__future__.all_feature_names)):
+            test = create_to_new_test(feat)
+            test.__name__ = str('test_{0}'.format(feat))
+            test.__doc__ = 'Verify that the feature is not newer than current.'
+            dct[test.__name__] = test
+        return super(FeaturesMetaClass, cls).__new__(cls, name, bases, dct)
+
+
+@six.add_metaclass(FeaturesMetaClass)
+class TestFeatures(TestCaseBase):
+
+    """Verify that the features are up to date."""
+
+    def test_future_itself(self):
+        """Test that all_feature_names actually contains all entries."""
+        self.assertCountEqual(__future__.all_feature_names,
+                              [feat for feat in dir(__future__)
+                               if not feat.isupper() and feat[0] != '_' and
+                               feat != 'all_feature_names'])
 
 
 if __name__ == '__main__':
