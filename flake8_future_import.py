@@ -47,7 +47,7 @@ class Flake8Argparse(object):
         class Wrapper(object):
             def add_argument(self, *args, **kwargs):
                 # flake8 uses config_options to handle stuff like 'store_true'
-                if kwargs['action'] == 'store_true':
+                if kwargs.get('action') == 'store_true':
                     for opt in args:
                         if opt.startswith('--'):
                             break
@@ -107,8 +107,7 @@ class FutureImportChecker(Flake8Argparse):
         parser.add_argument('--require-code', action='store_true',
                             help='Do only apply to files which not only have '
                                  'comments and (doc)strings')
-        parser.add_argument('--min-version', default=False, const=True,
-                            nargs='?',
+        parser.add_argument('--min-version', default=False,
                             help='The minimum version supported so that it can '
                                  'ignore mandatory and non-existent features')
 
@@ -117,17 +116,14 @@ class FutureImportChecker(Flake8Argparse):
         cls.require_code = options.require_code
         min_version = options.min_version
         if min_version is not False:
-            if min_version is True:
-                min_version = sys.version_info[:3]
-            else:
-                try:
-                    min_version = tuple(int(num)
-                                        for num in min_version.split('.'))
-                except ValueError:
-                    raise ValueError('Minimum version "{0}" not formatted '
-                                     'like "A.B.C"'.format(min_version))
-                min_version += (0, ) * (max(3 - len(min_version), 0))
-                # TODO: Warn when longer than 3
+            try:
+                min_version = tuple(int(num)
+                                    for num in min_version.split('.'))
+            except ValueError:
+                raise ValueError('Minimum version "{0}" not formatted '
+                                 'like "A.B.C"'.format(min_version))
+            min_version += (0, ) * (max(3 - len(min_version), 0))
+            # TODO: Warn when longer than 3
         cls.min_version = min_version
 
     def _generate_error(self, future_import, lineno, present):
