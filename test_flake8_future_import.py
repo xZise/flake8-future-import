@@ -4,7 +4,9 @@ import ast
 import codecs
 import itertools
 import os
+import pip
 import re
+import subprocess
 import tempfile
 import unittest
 
@@ -20,7 +22,9 @@ def generate_code(*imported):
             "from os import path\n"
             "print('Hello World')\n"
             "if 42 % 2 == 0:\n"
-            "    print('42 is even')")
+            "    print('42 is even')\n"
+            "print(sys.version_info)\n"
+            "print(path.abspath(__file__))\n")
     for chain in imported:
         code = "from __future__ import {0}\n{1}".format(
             ', '.join(chain), code)
@@ -166,6 +170,67 @@ class BadSyntaxMetaClass(type):
 class BadSyntaxTestCase(TestCaseBase):
 
     """Test using various bad syntax examples from Python's library."""
+
+
+class Flake8TestCase(unittest.TestCase):
+
+    """
+    Test this plugin using flake8.
+
+    This must install it in order for flake8 to be detected and might change the
+    current environment. So run it only if "TEST_FLAKE8_INSTALL" is set.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        for dist in pip.utils.get_installed_distributions():
+            if dist.key == 'flake8-future-import':
+                if dist.location != os.path.dirname(os.path.abspath(__file__)):
+                    raise unittest.SkipTest('The plugin is already installed '
+                                            'but somewhere else.')
+                cls._installed = False
+                break
+        else:
+            if os.environ.get('TEST_FLAKE8_INSTALL') == '1':
+                output = subprocess.check_output(['python', 'setup.py',
+                                                  'develop'])
+                output = output.decode('utf8')
+                print('Installed package:\n\n' + output)
+                raise unittest.SkipTest('Installation not yet implemented')
+                cls._installed = True
+            else:
+                raise unittest.SkipTest('The plugin is not installed and '
+                                        'TEST_FLAKE8_INSTALL not set')
+        super(Flake8TestCase, cls).setUpClass()
+
+    @classmethod
+    def tearDownClass(cls):
+        if cls._installed:
+            output = subprocess.check_output(['pip', 'uninstall',
+                                              'flake8-future-import'])
+            output = output.decode('utf8')
+            print('Uninstalled package:\n\n' + output)
+        super(Flake8TestCase, cls).tearDownClass()
+
+    def test_flake8(self):
+        imported = [['unicode_literals']]
+        code = generate_code(*imported)
+        code = '#!/usr/bin/python\n# -*- coding: utf-8 -*-\n' + code
+        handle, tmp_file = tempfile.mkstemp()
+        print(tmp_file)
+        try:
+            with codecs.open(tmp_file, 'w', 'utf-8') as f:
+                f.write(code)
+            env = os.environ.copy()
+            env['PYTHONIOENCODING'] = 'utf8'
+            command = ['flake8', tmp_file]
+            p = subprocess.Popen(command, env=env, stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE)
+            data_out = p.communicate()
+        finally:
+            os.close(handle)
+            os.remove(tmp_file)
+        print(data_out)
 
 
 if __name__ == '__main__':
