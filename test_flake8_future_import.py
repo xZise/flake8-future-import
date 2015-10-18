@@ -26,7 +26,6 @@ def generate_code(*imported):
 class TestCaseBase(unittest.TestCase):
 
     def run_test(self, iterator, *imported):
-        tree = ast.parse(generate_code(*imported))
         imported = set(itertools.chain(*imported))
         missing = set(flake8_future_import
                       .FutureImportChecker.AVAILABLE_IMPORTS) - imported
