@@ -117,6 +117,12 @@ cannot skip reporting those imports.
 Changes
 -------
 
+0.3.2 - 2015-10-18
+``````````````````
+* Prevent errors when using unknown future imports
+* Test several examples for bad future imports from the Python library
+* Fixed the README to use present for the higher codes
+
 0.3.1 - 2015-09-07
 ``````````````````
 * Support setting ``--require-code`` in the ``tox.ini``
