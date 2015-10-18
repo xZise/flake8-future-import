@@ -12,7 +12,7 @@ except ImportError as e:
 
 from ast import NodeVisitor, PyCF_ONLY_AST, Str, Module
 
-__version__ = '0.3.2'
+__version__ = '0.4.0.dev1'
 
 
 class FutureImportVisitor(NodeVisitor):
@@ -67,7 +67,8 @@ class FutureImportChecker(Flake8Argparse):
 
     # Order important as it defines the error code
     AVAILABLE_IMPORTS = ('division', 'absolute_import', 'with_statement',
-                         'print_function', 'unicode_literals', 'generator_stop')
+                         'print_function', 'unicode_literals', 'generator_stop',
+                         'nested_scopes', 'generators')
 
     version = __version__
     name = 'flake8-future-import'
@@ -87,12 +88,17 @@ class FutureImportChecker(Flake8Argparse):
         cls.require_code = options.require_code
 
     def _generate_error(self, future_import, lineno, present):
-        code = 10 + self.AVAILABLE_IMPORTS.index(future_import)
-        if present:
-            msg = 'FI{0} __future__ import "{1}" present'
-            code += 40
+        if future_import not in self.AVAILABLE_IMPORTS:
+            code = 90
+            msg = 'does not exist'
         else:
-            msg = 'FI{0} __future__ import "{1}" missing'
+            code = 10 + self.AVAILABLE_IMPORTS.index(future_import)
+            if present:
+                msg = 'present'
+                code += 40
+            else:
+                msg = 'missing'
+        msg = 'FI{0} __future__ import "{1}" ' + msg
         return lineno, 0, msg.format(code, future_import), type(self)
 
     def run(self):
@@ -103,9 +109,6 @@ class FutureImportChecker(Flake8Argparse):
         present = set()
         for import_node in visitor.future_imports:
             for alias in import_node.names:
-                if alias.name not in self.AVAILABLE_IMPORTS:
-                    # unknown code
-                    continue
                 yield self._generate_error(alias.name, import_node.lineno, True)
                 present.add(alias.name)
         for name in self.AVAILABLE_IMPORTS:
@@ -122,6 +125,7 @@ def main(args):
                   range(len(FutureImportChecker.AVAILABLE_IMPORTS)))
     choices |= set('FI' + str(50 + choice) for choice in
                    range(len(FutureImportChecker.AVAILABLE_IMPORTS)))
+    choices |= set('FI90')
     parser.add_argument('--ignore', help='Ignore the given comma-separated '
                                          'codes')
     FutureImportChecker.add_arguments(parser)

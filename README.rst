@@ -85,6 +85,10 @@ This plugin is using the following error codes:
 +------+--------------------------------------------------+
 | FI15 | ``__future__`` import "generator_stop" missing   |
 +------+--------------------------------------------------+
+| FI16 | ``__future__`` import "nested_scopes" missing    |
++------+--------------------------------------------------+
+| FI17 | ``__future__`` import "generators" missing       |
++------+--------------------------------------------------+
 +------+--------------------------------------------------+
 | FI50 | ``__future__`` import "division" present         |
 +------+--------------------------------------------------+
@@ -97,6 +101,13 @@ This plugin is using the following error codes:
 | FI54 | ``__future__`` import "unicode_literals" present |
 +------+--------------------------------------------------+
 | FI55 | ``__future__`` import "generator_stop" present   |
++------+--------------------------------------------------+
+| FI56 | ``__future__`` import "nested_scopes" present    |
++------+--------------------------------------------------+
+| FI57 | ``__future__`` import "generators" present       |
++------+--------------------------------------------------+
++------+--------------------------------------------------+
+| FI90 | ``__future__`` import does not exist             |
 +------+--------------------------------------------------+
 
 For a sensible usage, for each import either or both error code need to be
@@ -116,6 +127,11 @@ cannot skip reporting those imports.
 
 Changes
 -------
+
+0.4.0 - 2015-10-19
+``````````````````
+* Add two older ``future`` imports
+* Issue an error when a future import does not exist
 
 0.3.2 - 2015-10-18
 ``````````````````
