@@ -7,6 +7,7 @@ import os
 import pip
 import re
 import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -175,6 +176,7 @@ class BadSyntaxTestCase(TestCaseBase):
     """Test using various bad syntax examples from Python's library."""
 
 
+@unittest.skipIf(sys.version_info[:2] >= (3, 6), 'flake8 does not support 3.6')
 class Flake8TestCase(TestCaseBase):
 
     """
