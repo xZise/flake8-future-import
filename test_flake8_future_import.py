@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import __future__
 import ast
 import codecs
 import itertools
@@ -9,7 +10,11 @@ import re
 import subprocess
 import sys
 import tempfile
-import unittest
+
+if sys.version_info < (2, 7):
+    import unittest2 as unittest
+else:
+    import unittest
 
 import six
 
@@ -45,34 +50,41 @@ class TestCaseBase(unittest.TestCase):
     def check_result(self, iterator):
         found_missing = set()
         found_forbidden = set()
+        found_invalid = set()
         for line, msg in iterator:
-            match = re.match('FI(\d\d) __future__ import "([a-z_]+)" '
-                             '(missing|present)', msg)
-            self.assertIsNotNone(match)
+            match = re.match(r'FI(\d\d) __future__ import "([^"]+)" '
+                             r'(missing|present|does not exist)', msg)
+            self.assertIsNotNone(match, 'Line "{0}" did not match.'.format(msg))
             code = int(match.group(1))
-            self.assertLess(code, 90)
-            self.assertEqual(10 <= code < 50, match.group(3) == 'missing')
-            imp = flake8_future_import.FutureImportChecker.AVAILABLE_IMPORTS[
-                (code - 10) % 40]
-            self.assertEqual(match.group(2), imp)
-            if code < 50:
-                found_missing.add(imp)
-                self.assertEqual(line, 1)
+            if code < 90:
+                self.assertIs(10 <= code < 50, match.group(3) == 'missing')
+                imp = flake8_future_import.FutureImportChecker.AVAILABLE_IMPORTS[
+                    (code - 10) % 40]
+                self.assertEqual(match.group(2), imp)
+                if code < 50:
+                    found_missing.add(imp)
+                    self.assertEqual(line, 1)
+                else:
+                    found_forbidden.add(imp)
             else:
-                found_forbidden.add(imp)
+                self.assertEqual(code, 90)
+                found_invalid.add(match.group(2))
         self.assertFalse(found_missing & found_forbidden)
-        self.assertFalse(found_missing - all_available)
-        self.assertFalse(found_forbidden - all_available)
-        return found_missing, found_forbidden
+        self.assertFalse(found_missing & found_invalid)
+        self.assertFalse(found_forbidden & found_invalid)
+        self.assertFalse(found_invalid & all_available)
+        return found_missing, found_forbidden, found_invalid
 
     def run_test(self, iterator, *imported):
         imported = set(itertools.chain(*imported))
         missing = set(flake8_future_import
                       .FutureImportChecker.AVAILABLE_IMPORTS) - imported
-        imported &= all_available
-        found_missing, found_forbidden = self.check_result(iterator)
+        invalid = imported - all_available
+        imported -= invalid
+        found_missing, found_forbidden, found_invalid = self.check_result(iterator)
         self.assertEqual(found_missing, missing)
         self.assertEqual(found_forbidden, imported - missing)
+        self.assertEqual(found_invalid, invalid)
 
     def iterator(self, checker):
         for line, char, msg, origin in checker.run():
@@ -138,17 +150,26 @@ class TestMainPrintPatched(TestCaseBase):
 
 class BadSyntaxMetaClass(type):
 
-    expected_imports = dict((n, set()) for n in range(3, 10))
-    expected_imports[10] = set(['absolute_import', 'print_function'])
+    expected_imports = dict((n, (set(), set())) for n in range(4, 8))
+    expected_imports[3] = (set(), set(['rested_snopes']))
+    expected_imports[8] = (set(), set(['*']))
+    expected_imports[9] = (set(), set(['braces']))
+    expected_imports[10] = (set(['absolute_import', 'print_function']), set())
+    for n in range(3, 10):
+        if n == 8:
+            continue
+        expected_imports[n][0].add('nested_scopes')
 
     def __new__(cls, name, bases, dct):
-        def create_test(tree, expected):
+        def create_test(tree, expected, filename):
             def test(self):
-                checker = flake8_future_import.FutureImportChecker(tree, 'fn')
+                checker = flake8_future_import.FutureImportChecker(tree,
+                                                                   filename)
                 iterator = self.iterator(checker)
-                found_missing, found_forbidden = self.check_result(iterator)
-                self.assertEqual(found_missing, all_available - expected)
-                self.assertEqual(found_forbidden, expected)
+                found_missing, found_forbidden, found_invalid = self.check_result(iterator)
+                self.assertEqual(found_missing, all_available - expected[0])
+                self.assertEqual(found_forbidden, expected[0])
+                self.assertEqual(found_invalid, expected[1])
             return test
 
         files_found = set()
@@ -160,7 +181,7 @@ class BadSyntaxMetaClass(type):
                     print('File "{0}" is not expected'.format(fn))
                 with open(fn, 'rb') as f:
                     tree = compile(f.read(), fn, 'exec', ast.PyCF_ONLY_AST)
-                test = create_test(tree, cls.expected_imports[num])
+                test = create_test(tree, cls.expected_imports[num], fn)
                 test.__name__ = str('test_badsyntax_{0}'.format(num))
                 dct[test.__name__] = test
                 files_found.add(num)
@@ -171,7 +192,7 @@ class BadSyntaxMetaClass(type):
 
 
 @six.add_metaclass(BadSyntaxMetaClass)
-class BadSyntaxTestCase(TestCaseBase):
+class TestBadSyntax(TestCaseBase):
 
     """Test using various bad syntax examples from Python's library."""
 
@@ -244,6 +265,54 @@ class Flake8TestCase(TestCaseBase):
         self.run_flake8(['unicode_literals'], ['division'])
         self.run_flake8(['invalid_code'])
         self.run_flake8(['invalid_code', 'unicode_literals'])
+
+
+class FeaturesMetaClass(type):
+
+    def __new__(cls, name, bases, dct):
+        def create_existing_test(feat_name):
+            def test(self):
+                self.assertIn(feat_name, flake8_future_import.FEATURES)
+                py_feat = getattr(__future__, feat_name)
+                my_feat = flake8_future_import.FEATURES[feat_name]
+                self.assertEqual(my_feat.optional, py_feat.optional[:3])
+                self.assertEqual(my_feat.mandatory, py_feat.mandatory[:3])
+            return test
+
+        def create_to_new_test(feat_name):
+            def test(self):
+                self.assertGreater(
+                    flake8_future_import.FEATURES[feat_name].optional,
+                    sys.version_info[:3])
+
+        for feat in __future__.all_feature_names:
+            if feat == 'barry_as_FLUFL':
+                continue  # thank you April's Foul
+            test = create_existing_test(feat)
+            test.__name__ = str('test_{0}'.format(feat))
+            test.__doc__ = 'Verify the feature versions.'
+            dct[test.__name__] = test
+
+        for missing_feat in (set(flake8_future_import.FEATURES) -
+                             set(__future__.all_feature_names)):
+            test = create_to_new_test(feat)
+            test.__name__ = str('test_{0}'.format(feat))
+            test.__doc__ = 'Verify that the feature is not newer than current.'
+            dct[test.__name__] = test
+        return super(FeaturesMetaClass, cls).__new__(cls, name, bases, dct)
+
+
+@six.add_metaclass(FeaturesMetaClass)
+class TestFeatures(TestCaseBase):
+
+    """Verify that the features are up to date."""
+
+    def test_future_itself(self):
+        """Test that all_feature_names actually contains all entries."""
+        self.assertCountEqual(__future__.all_feature_names,
+                              [feat for feat in dir(__future__)
+                               if not feat.isupper() and feat[0] != '_' and
+                               feat != 'all_feature_names'])
 
 
 if __name__ == '__main__':

@@ -12,7 +12,7 @@ except ImportError as e:
 
 from ast import NodeVisitor, PyCF_ONLY_AST, Str, Module
 
-__version__ = '0.3.2'
+__version__ = '0.4.0.dev1'
 
 
 class FutureImportVisitor(NodeVisitor):
@@ -47,7 +47,7 @@ class Flake8Argparse(object):
         class Wrapper(object):
             def add_argument(self, *args, **kwargs):
                 # flake8 uses config_options to handle stuff like 'store_true'
-                if kwargs['action'] == 'store_true':
+                if kwargs.get('action') == 'store_true':
                     for opt in args:
                         if opt.startswith('--'):
                             break
@@ -63,15 +63,41 @@ class Flake8Argparse(object):
         pass
 
 
+class Feature(object):
+
+    def __init__(self, index, name, optional, mandatory):
+        self.index = index
+        self.name = name
+        self.optional = optional
+        self.mandatory = mandatory
+
+
+DIVISION = Feature(0, 'division', (2, 2, 0), (3, 0, 0))
+ABSOLUTE_IMPORT = Feature(1, 'absolute_import', (2, 5, 0), (3, 0, 0))
+WITH_STATEMENT = Feature(2, 'with_statement', (2, 5, 0), (2, 6, 0))
+PRINT_FUNCTION = Feature(3, 'print_function', (2, 6, 0), (3, 0, 0))
+UNICODE_LITERALS = Feature(4, 'unicode_literals', (2, 6, 0), (3, 0, 0))
+GENERATOR_STOP = Feature(5, 'generator_stop', (3, 5, 0), (3, 7, 0))
+NESTED_SCOPES = Feature(6, 'nested_scopes', (2, 1, 0), (2, 2, 0))
+GENERATORS = Feature(7, 'generators', (2, 2, 0), (2, 3, 0))
+
+
+FEATURES = dict((feature.name, feature) for feature in
+                (DIVISION, ABSOLUTE_IMPORT, WITH_STATEMENT, PRINT_FUNCTION,
+                 UNICODE_LITERALS, GENERATOR_STOP, NESTED_SCOPES, GENERATORS))
+
+
 class FutureImportChecker(Flake8Argparse):
 
     # Order important as it defines the error code
-    AVAILABLE_IMPORTS = ('division', 'absolute_import', 'with_statement',
-                         'print_function', 'unicode_literals', 'generator_stop')
+    # DEPRECATED
+    AVAILABLE_IMPORTS = tuple(feature.name
+                              for feature in sorted(FEATURES.values(), key=lambda f: f.index))
 
     version = __version__
     name = 'flake8-future-import'
     require_code = True
+    min_version = False
 
     def __init__(self, tree, filename):
         self.tree = tree
@@ -81,18 +107,43 @@ class FutureImportChecker(Flake8Argparse):
         parser.add_argument('--require-code', action='store_true',
                             help='Do only apply to files which not only have '
                                  'comments and (doc)strings')
+        parser.add_argument('--min-version', default=False,
+                            help='The minimum version supported so that it can '
+                                 'ignore mandatory and non-existent features')
 
     @classmethod
     def parse_options(cls, options):
         cls.require_code = options.require_code
+        min_version = options.min_version
+        if min_version is not False:
+            try:
+                min_version = tuple(int(num)
+                                    for num in min_version.split('.'))
+            except ValueError:
+                raise ValueError('Minimum version "{0}" not formatted '
+                                 'like "A.B.C"'.format(min_version))
+            min_version += (0, ) * (max(3 - len(min_version), 0))
+            # TODO: Warn when longer than 3
+        cls.min_version = min_version
 
     def _generate_error(self, future_import, lineno, present):
-        code = 10 + self.AVAILABLE_IMPORTS.index(future_import)
-        if present:
-            msg = 'FI{0} __future__ import "{1}" present'
-            code += 40
+        feature = FEATURES.get(future_import)
+        if feature is None:
+            code = 90
+            msg = 'does not exist'
         else:
-            msg = 'FI{0} __future__ import "{1}" missing'
+            if (self.min_version and
+                    ((feature.mandatory < self.min_version and not present) or
+                     feature.optional > self.min_version)):
+                return None
+
+            code = 10 + feature.index
+            if present:
+                msg = 'present'
+                code += 40
+            else:
+                msg = 'missing'
+        msg = 'FI{0} __future__ import "{1}" ' + msg
         return lineno, 0, msg.format(code, future_import), type(self)
 
     def run(self):
@@ -103,14 +154,15 @@ class FutureImportChecker(Flake8Argparse):
         present = set()
         for import_node in visitor.future_imports:
             for alias in import_node.names:
-                if alias.name not in self.AVAILABLE_IMPORTS:
-                    # unknown code
-                    continue
-                yield self._generate_error(alias.name, import_node.lineno, True)
+                err = self._generate_error(alias.name, import_node.lineno, True)
+                if err:
+                    yield err
                 present.add(alias.name)
-        for name in self.AVAILABLE_IMPORTS:
+        for name in FEATURES:
             if name not in present:
-                yield self._generate_error(name, 1, False)
+                err = self._generate_error(name, 1, False)
+                if err:
+                    yield err
 
 
 def main(args):
@@ -118,10 +170,9 @@ def main(args):
         print('argparse is required for the standalone version.')
         return
     parser = argparse.ArgumentParser()
-    choices = set('FI' + str(10 + choice) for choice in
-                  range(len(FutureImportChecker.AVAILABLE_IMPORTS)))
-    choices |= set('FI' + str(50 + choice) for choice in
-                   range(len(FutureImportChecker.AVAILABLE_IMPORTS)))
+    choices = set(10 + feature.index for feature in FEATURES.values())
+    choices |= set(50 + choice for choice in choices) | set([90, 91])
+    choices = set('FI{0}'.format(choice) for choice in choices)
     parser.add_argument('--ignore', help='Ignore the given comma-separated '
                                          'codes')
     FutureImportChecker.add_arguments(parser)

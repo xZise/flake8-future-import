@@ -63,6 +63,12 @@ This module adds one parameter:
 * ``--require-code``: Doesn't complain on files which only contain comments or
   strings (and by extension docstrings). Corresponds to ``require-code = True``
   in the ``tox.ini``.
+* ``--min-version``: Define the minimum version supported by the project. Any
+  features already mandatory are ignored then by default. Additionally features
+  not available in that version will be forbidden by default. If no version is
+  specified but the parameter is present, or it is set to True in ``tox.ini``,
+  it's using the version of Python running it. Corresponds to
+  ``min-version = …`` in the ``tox.ini``.
 
 The stand alone version also mimics flake8's ignore parameter.
 
@@ -85,6 +91,10 @@ This plugin is using the following error codes:
 +------+--------------------------------------------------+
 | FI15 | ``__future__`` import "generator_stop" missing   |
 +------+--------------------------------------------------+
+| FI16 | ``__future__`` import "nested_scopes" missing    |
++------+--------------------------------------------------+
+| FI17 | ``__future__`` import "generators" missing       |
++------+--------------------------------------------------+
 +------+--------------------------------------------------+
 | FI50 | ``__future__`` import "division" present         |
 +------+--------------------------------------------------+
@@ -97,6 +107,13 @@ This plugin is using the following error codes:
 | FI54 | ``__future__`` import "unicode_literals" present |
 +------+--------------------------------------------------+
 | FI55 | ``__future__`` import "generator_stop" present   |
++------+--------------------------------------------------+
+| FI56 | ``__future__`` import "nested_scopes" present    |
++------+--------------------------------------------------+
+| FI57 | ``__future__`` import "generators" present       |
++------+--------------------------------------------------+
++------+--------------------------------------------------+
+| FI90 | ``__future__`` import does not exist             |
 +------+--------------------------------------------------+
 
 For a sensible usage, for each import either or both error code need to be
@@ -116,6 +133,14 @@ cannot skip reporting those imports.
 
 Changes
 -------
+
+0.4.0 - 2015-10-19
+``````````````````
+* Add two older ``future`` imports
+* Issue an error when a future import does not exist
+* Define which is the oldest Python version to be supported so that already
+  mandatory features can be ignored and not yet supported features default to
+  forbidden (ignoring the lower error code).
 
 0.3.2 - 2015-10-18
 ``````````````````
