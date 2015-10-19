@@ -47,13 +47,12 @@ class Flake8Argparse(object):
         class Wrapper(object):
             def add_argument(self, *args, **kwargs):
                 # flake8 uses config_options to handle stuff like 'store_true'
-                if kwargs.get('action') == 'store_true':
-                    for opt in args:
-                        if opt.startswith('--'):
-                            break
-                    else:
-                        opt = args[0]
-                    parser.config_options.append(opt.lstrip('-'))
+                for opt in args:
+                    if opt.startswith('--'):
+                        break
+                else:
+                    opt = args[0]
+                parser.config_options.append(opt.lstrip('-'))
                 parser.add_option(*args, **kwargs)
 
         cls.add_arguments(Wrapper())
