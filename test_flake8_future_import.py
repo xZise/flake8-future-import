@@ -349,5 +349,64 @@ class TestFeatures(TestCaseBase):
     """Verify that the features are up to date."""
 
 
+class FeatureDetectionTestCase(TestCaseBase):
+
+    ALWAYS_MISSING = frozenset(('generator_stop', 'nested_scopes'))
+
+    def check_code(self, code):
+        tree = ast.parse(code)
+        checker = flake8_future_import.FutureImportChecker(tree, 'fn')
+        checker.require_used = True
+        iterator = self.iterator(checker)
+        return self.check_result(iterator)
+
+    def assert_errors(self, code, missing=None, forbidden=None):
+        missing = missing or set()
+        forbidden = forbidden or set()
+
+        found_missing, found_forbidden, _ = self.check_code(code)
+
+        self.assertEqual(missing, found_missing)
+        self.assertEqual(forbidden, found_forbidden)
+
+    def test_no_code(self):
+        self.assert_errors('')
+        self.assert_errors('# comment only')
+
+    def test_simple_statement(self):
+        self.assert_errors('1+1', missing=self.ALWAYS_MISSING)
+
+    def test_print_function(self):
+        self.assert_errors('print(foo)', self.ALWAYS_MISSING | set(['print_function']))
+
+    def test_unicode_literals(self):
+        expected_missing = self.ALWAYS_MISSING | set(['unicode_literals'])
+        self.assert_errors('"foo"', expected_missing)
+        self.assert_errors('u"foo"', expected_missing)
+        self.assert_errors('r"foo"', expected_missing)
+        self.assert_errors('fn("foo")', expected_missing)
+
+    def test_division(self):
+        # not division
+        self.assert_errors('a % b', self.ALWAYS_MISSING)
+
+        expected_missing = self.ALWAYS_MISSING | set(['division'])
+        self.assert_errors('1 / 0', expected_missing)
+        self.assert_errors('1 / 2 / 1', expected_missing)
+        self.assert_errors('a /= b', expected_missing)
+        self.assert_errors('fn(3 / 2)', expected_missing)
+
+    def test_absolute_import(self):
+        expected_missing = self.ALWAYS_MISSING | set(['absolute_import'])
+        self.assert_errors('import foo\npass', expected_missing)
+        self.assert_errors('from foo import bar\npass', expected_missing)
+
+    def test_with_statement(self):
+        self.assert_errors('with foo: foo()', self.ALWAYS_MISSING | set(['with_statement']))
+
+    def test_generators(self):
+        self.assert_errors('def foo(): yield', self.ALWAYS_MISSING | set(['generators']))
+
+
 if __name__ == '__main__':
     unittest.main()
