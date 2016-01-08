@@ -176,7 +176,7 @@ class BadSyntaxMetaClass(type):
                 if num not in cls.expected_imports:
                     print('File "{0}" is not expected'.format(fn))
                 with open(fn, 'rb') as f:
-                    tree = compile(f.read(), fn, 'exec', ast.PyCF_ONLY_AST)
+                    tree = ast.parse(f.read(), filename=fn, mode='exec')
                 test = create_test(tree, cls.expected_imports[num], fn)
                 test.__name__ = str('test_badsyntax_{0}'.format(num))
                 dct[test.__name__] = test
