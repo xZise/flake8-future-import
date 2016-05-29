@@ -280,6 +280,12 @@ class FeaturesMetaClass(type):
                 self.assertGreater(
                     flake8_future_import.FEATURES[feat_name].optional,
                     sys.version_info[:3])
+            return test
+
+        # Verify that Python didn't mess up all_feature_names
+        assert not set(__future__.all_feature_names) ^ set(feat for feat in dir(__future__)
+                                                           if not feat.isupper() and feat[0] != '_' and
+                                                           feat != 'all_feature_names')
 
         for feat in __future__.all_feature_names:
             if feat == 'barry_as_FLUFL':
@@ -291,8 +297,8 @@ class FeaturesMetaClass(type):
 
         for missing_feat in (set(flake8_future_import.FEATURES) -
                              set(__future__.all_feature_names)):
-            test = create_to_new_test(feat)
-            test.__name__ = str('test_{0}'.format(feat))
+            test = create_to_new_test(missing_feat)
+            test.__name__ = str('test_{0}'.format(missing_feat))
             test.__doc__ = 'Verify that the feature is not newer than current.'
             dct[test.__name__] = test
         return super(FeaturesMetaClass, cls).__new__(cls, name, bases, dct)
@@ -302,13 +308,6 @@ class FeaturesMetaClass(type):
 class TestFeatures(TestCaseBase):
 
     """Verify that the features are up to date."""
-
-    def test_future_itself(self):
-        """Test that all_feature_names actually contains all entries."""
-        self.assertCountEqual(__future__.all_feature_names,
-                              [feat for feat in dir(__future__)
-                               if not feat.isupper() and feat[0] != '_' and
-                               feat != 'all_feature_names'])
 
 
 if __name__ == '__main__':
