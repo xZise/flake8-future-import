@@ -20,8 +20,6 @@ import six
 
 import flake8_future_import
 
-all_available = set(flake8_future_import.FutureImportChecker.AVAILABLE_IMPORTS)
-
 
 def generate_code(*imported):
     code = ("import sys\n"
@@ -58,8 +56,7 @@ class TestCaseBase(unittest.TestCase):
             code = int(match.group(1))
             if code < 90:
                 self.assertIs(10 <= code < 50, match.group(3) == 'missing')
-                imp = flake8_future_import.FutureImportChecker.AVAILABLE_IMPORTS[
-                    (code - 10) % 40]
+                imp = flake8_future_import.ALL_FEATURES[(code - 10) % 40].name
                 self.assertEqual(match.group(2), imp)
                 if code < 50:
                     found_missing.add(imp)
@@ -72,14 +69,13 @@ class TestCaseBase(unittest.TestCase):
         self.assertFalse(found_missing & found_forbidden)
         self.assertFalse(found_missing & found_invalid)
         self.assertFalse(found_forbidden & found_invalid)
-        self.assertFalse(found_invalid & all_available)
+        self.assertFalse(found_invalid & set(flake8_future_import.ALL_FEATURES))
         return found_missing, found_forbidden, found_invalid
 
     def run_test(self, iterator, *imported):
         imported = set(itertools.chain(*imported))
-        missing = set(flake8_future_import
-                      .FutureImportChecker.AVAILABLE_IMPORTS) - imported
-        invalid = imported - all_available
+        missing = set(flake8_future_import.ALL_FEATURES) - imported
+        invalid = imported - set(flake8_future_import.ALL_FEATURES)
         imported -= invalid
         found_missing, found_forbidden, found_invalid = self.check_result(iterator)
         self.assertEqual(found_missing, missing)
@@ -167,7 +163,7 @@ class BadSyntaxMetaClass(type):
                                                                    filename)
                 iterator = self.iterator(checker)
                 found_missing, found_forbidden, found_invalid = self.check_result(iterator)
-                self.assertEqual(found_missing, all_available - expected[0])
+                self.assertEqual(found_missing, set(flake8_future_import.ALL_FEATURES) - expected[0])
                 self.assertEqual(found_forbidden, expected[0])
                 self.assertEqual(found_invalid, expected[1])
             return test

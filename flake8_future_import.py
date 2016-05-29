@@ -81,17 +81,16 @@ NESTED_SCOPES = Feature(6, 'nested_scopes', (2, 1, 0), (2, 2, 0))
 GENERATORS = Feature(7, 'generators', (2, 2, 0), (2, 3, 0))
 
 
-FEATURES = dict((feature.name, feature) for feature in
-                (DIVISION, ABSOLUTE_IMPORT, WITH_STATEMENT, PRINT_FUNCTION,
-                 UNICODE_LITERALS, GENERATOR_STOP, NESTED_SCOPES, GENERATORS))
+# Order important as it defines the error code
+ALL_FEATURES = (DIVISION, ABSOLUTE_IMPORT, WITH_STATEMENT, PRINT_FUNCTION,
+                UNICODE_LITERALS, GENERATOR_STOP, NESTED_SCOPES, GENERATORS)
+FEATURES = dict((feature.name, feature) for feature in ALL_FEATURES)
+# Make sure the features aren't messed up
+assert len(FEATURES) == len(ALL_FEATURES)
+assert all(feature.index == index for index, feature in enumerate(ALL_FEATURES))
 
 
 class FutureImportChecker(Flake8Argparse):
-
-    # Order important as it defines the error code
-    # DEPRECATED
-    AVAILABLE_IMPORTS = tuple(feature.name
-                              for feature in sorted(FEATURES.values(), key=lambda f: f.index))
 
     version = __version__
     name = 'flake8-future-import'
