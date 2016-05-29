@@ -85,6 +85,7 @@ GENERATORS = Feature(7, 'generators', (2, 2, 0), (2, 3, 0))
 ALL_FEATURES = (DIVISION, ABSOLUTE_IMPORT, WITH_STATEMENT, PRINT_FUNCTION,
                 UNICODE_LITERALS, GENERATOR_STOP, NESTED_SCOPES, GENERATORS)
 FEATURES = dict((feature.name, feature) for feature in ALL_FEATURES)
+FEATURE_NAMES = frozenset(feature.name for feature in ALL_FEATURES)
 # Make sure the features aren't messed up
 assert len(FEATURES) == len(ALL_FEATURES)
 assert all(feature.index == index for index, feature in enumerate(ALL_FEATURES))

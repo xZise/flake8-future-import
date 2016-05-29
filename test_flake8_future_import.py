@@ -69,13 +69,13 @@ class TestCaseBase(unittest.TestCase):
         self.assertFalse(found_missing & found_forbidden)
         self.assertFalse(found_missing & found_invalid)
         self.assertFalse(found_forbidden & found_invalid)
-        self.assertFalse(found_invalid & set(flake8_future_import.ALL_FEATURES))
+        self.assertFalse(found_invalid & flake8_future_import.FEATURE_NAMES)
         return found_missing, found_forbidden, found_invalid
 
     def run_test(self, iterator, *imported):
         imported = set(itertools.chain(*imported))
-        missing = set(flake8_future_import.ALL_FEATURES) - imported
-        invalid = imported - set(flake8_future_import.ALL_FEATURES)
+        missing = flake8_future_import.FEATURE_NAMES - imported
+        invalid = imported - flake8_future_import.FEATURE_NAMES
         imported -= invalid
         found_missing, found_forbidden, found_invalid = self.check_result(iterator)
         self.assertEqual(found_missing, missing)
@@ -163,7 +163,7 @@ class BadSyntaxMetaClass(type):
                                                                    filename)
                 iterator = self.iterator(checker)
                 found_missing, found_forbidden, found_invalid = self.check_result(iterator)
-                self.assertEqual(found_missing, set(flake8_future_import.ALL_FEATURES) - expected[0])
+                self.assertEqual(found_missing, flake8_future_import.FEATURE_NAMES - expected[0])
                 self.assertEqual(found_forbidden, expected[0])
                 self.assertEqual(found_invalid, expected[1])
             return test
