@@ -118,10 +118,11 @@ class FutureImportChecker(Flake8Argparse):
                 min_version = tuple(int(num)
                                     for num in min_version.split('.'))
             except ValueError:
+                min_version = None
+            if min_version is None or len(min_version) > 3:
                 raise ValueError('Minimum version "{0}" not formatted '
-                                 'like "A.B.C"'.format(min_version))
+                                 'like "A.B.C"'.format(options.min_version))
             min_version += (0, ) * (max(3 - len(min_version), 0))
-            # TODO: Warn when longer than 3
         cls.min_version = min_version
 
     def _generate_error(self, future_import, lineno, present):
