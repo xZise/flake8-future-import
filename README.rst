@@ -65,9 +65,7 @@ This module adds one parameter:
   in the ``tox.ini``.
 * ``--min-version``: Define the minimum version supported by the project. Any
   features already mandatory are ignored then by default. Additionally features
-  not available in that version will be forbidden by default. If no version is
-  specified but the parameter is present, or it is set to True in ``tox.ini``,
-  it's using the version of Python running it. Corresponds to
+  not available in that version will be forbidden by default. Corresponds to
   ``min-version = …`` in the ``tox.ini``.
 
 The stand alone version also mimics flake8's ignore parameter.
