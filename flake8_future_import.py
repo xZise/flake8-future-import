@@ -5,6 +5,8 @@ from __future__ import print_function
 
 import sys
 
+from collections import namedtuple
+
 try:
     import argparse
 except ImportError as e:
@@ -62,14 +64,7 @@ class Flake8Argparse(object):
         pass
 
 
-class Feature(object):
-
-    def __init__(self, index, name, optional, mandatory):
-        self.index = index
-        self.name = name
-        self.optional = optional
-        self.mandatory = mandatory
-
+Feature = namedtuple('Feature', 'index, name, optional, mandatory')
 
 DIVISION = Feature(0, 'division', (2, 2, 0), (3, 0, 0))
 ABSOLUTE_IMPORT = Feature(1, 'absolute_import', (2, 5, 0), (3, 0, 0))
