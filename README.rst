@@ -139,6 +139,7 @@ Changes
 * Define which is the oldest Python version to be supported so that already
   mandatory features can be ignored and not yet supported features default to
   forbidden (ignoring the lower error code).
+* Use return code of 1 if errors occurred
 
 0.3.2 - 2015-10-18
 ``````````````````

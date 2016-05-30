@@ -194,14 +194,17 @@ def main(args):
                     '", "'.join(invalid)))
     else:
         ignored = set()
+    has_errors = False
     for filename in args.files:
         with open(filename, 'rb') as f:
             tree = parse(f.read(), filename=filename, mode='exec')
         for line, char, msg, checker in FutureImportChecker(tree,
                                                             filename).run():
             if msg[:4] not in ignored:
+                has_errors = True
                 print('{0}:{1}:{2}: {3}'.format(filename, line, char + 1, msg))
+    return has_errors
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    sys.exit(1 if main(sys.argv[1:]) else 0)
