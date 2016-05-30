@@ -14,7 +14,7 @@ except ImportError as e:
 
 from ast import NodeVisitor, Str, Module, parse
 
-__version__ = '0.4.0'
+__version__ = '0.4.1dev0'
 
 
 class FutureImportVisitor(NodeVisitor):
@@ -127,8 +127,8 @@ class FutureImportChecker(Flake8Argparse):
             code = 90
             msg = 'does not exist'
         else:
-            if (self.min_version and
-                    ((feature.mandatory < self.min_version and not present) or
+            if (not present and self.min_version and
+                    (feature.mandatory <= self.min_version or
                      feature.optional > self.min_version)):
                 return None
 

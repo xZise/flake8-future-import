@@ -72,14 +72,18 @@ class TestCaseBase(unittest.TestCase):
         self.assertFalse(found_invalid & flake8_future_import.FEATURE_NAMES)
         return found_missing, found_forbidden, found_invalid
 
-    def run_test(self, iterator, *imported):
+    def run_test(self, iterator, imported, ignore_present=set(),
+                 ignore_missing=set()):
+        # assert that the ignored names are valid
+        assert not (ignore_present - flake8_future_import.FEATURE_NAMES)
+        assert not (ignore_missing - flake8_future_import.FEATURE_NAMES)
         imported = set(itertools.chain(*imported))
         missing = flake8_future_import.FEATURE_NAMES - imported
         invalid = imported - flake8_future_import.FEATURE_NAMES
         imported -= invalid
         found_missing, found_forbidden, found_invalid = self.check_result(iterator)
-        self.assertEqual(found_missing, missing)
-        self.assertEqual(found_forbidden, imported - missing)
+        self.assertEqual(found_missing, missing - ignore_missing)
+        self.assertEqual(found_forbidden, imported - missing - ignore_present)
         self.assertEqual(found_invalid, invalid)
 
     def iterator(self, checker):
@@ -94,7 +98,7 @@ class SimpleImportTestCase(TestCaseBase):
     def run_checker(self, *imported):
         tree = ast.parse(generate_code(*imported))
         checker = flake8_future_import.FutureImportChecker(tree, 'fn')
-        self.run_test(self.iterator(checker), *imported)
+        self.run_test(self.iterator(checker), imported)
 
     def test_checker(self):
         self.run_checker()
@@ -107,6 +111,39 @@ class SimpleImportTestCase(TestCaseBase):
     def test_main_invalid(self):
         self.assertRaises(ValueError, flake8_future_import.main,
             ['--ignore', 'foobar', '/dev/null'])
+
+
+class MinVersionTestCase(TestCaseBase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(MinVersionTestCase, cls).setUpClass()
+        cls._min_version = flake8_future_import.FutureImportChecker.min_version
+
+    @classmethod
+    def tearDownClass(cls):
+        flake8_future_import.FutureImportChecker.min_version = cls._min_version
+        super(MinVersionTestCase, cls).tearDownClass()
+
+    def run_checker(self, min_version, ignored, *imported):
+        tree = ast.parse(generate_code(*imported))
+        flake8_future_import.FutureImportChecker.min_version = min_version
+        checker = flake8_future_import.FutureImportChecker(tree, 'fn')
+        self.run_test(self.iterator(checker), imported, ignore_missing=ignored)
+
+    def test_mandatory_and_unavailable(self):
+        """Do not care about already mandatory or not yet available features."""
+        self.run_checker(
+            (2, 6, 0),
+            set(['nested_scopes', 'generators', 'with_statement', 'generator_stop']),
+            ('unicode_literals', ))
+
+    def test_use_of_unavailable(self):
+        """Use an import which is to new for the minimum version."""
+        self.run_checker(
+            (2, 6, 0),
+            set(['nested_scopes', 'generators', 'with_statement']),
+            ('generator_stop', ))
 
 
 class TestMainPrintPatched(TestCaseBase):
@@ -133,7 +170,7 @@ class TestMainPrintPatched(TestCaseBase):
             flake8_future_import.main([tmp_file])
         finally:
             os.remove(tmp_file)
-        self.run_test(reverse_parse(self.messages), *imported)
+        self.run_test(reverse_parse(self.messages), imported)
 
     def test_main(self):
         self.run_main()
@@ -251,7 +288,7 @@ class Flake8TestCase(TestCaseBase):
             os.remove(tmp_file)
         self.assertFalse(data_err)
         self.run_test(reverse_parse(data_out.decode('utf8').splitlines()),
-                      *imported)
+                      imported)
         self.assertEqual(p.returncode, 1)
 
     def test_flake8(self):
