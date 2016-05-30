@@ -166,7 +166,7 @@ def main(args):
         return
     parser = argparse.ArgumentParser()
     choices = set(10 + feature.index for feature in FEATURES.values())
-    choices |= set(50 + choice for choice in choices) | set([90])
+    choices |= set(40 + choice for choice in choices) | set([90])
     choices = set('FI{0}'.format(choice) for choice in choices)
     parser.add_argument('--ignore', help='Ignore the given comma-separated '
                                          'codes')
