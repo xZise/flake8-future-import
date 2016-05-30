@@ -1,7 +1,7 @@
 __future__ import checker
 =========================
 
-.. image:: https://secure.travis-ci.org/xZise/flake8-future-import.png?branch=0.4.0
+.. image:: https://secure.travis-ci.org/xZise/flake8-future-import.png?branch=0.4.1
    :alt: Build Status
    :target: https://travis-ci.org/xZise/flake8-future-import
 
@@ -43,7 +43,7 @@ When both ``flake8 2.0`` and ``flake8-future-imports`` are installed, the plugin
 is available in ``flake8``::
 
   $ flake8 --version
-  2.0 (pep8: 1.4.2, flake8-future-imports: 0.4.0, pyflakes: 0.6.1)
+  2.0 (pep8: 1.4.2, flake8-future-imports: 0.4.1, pyflakes: 0.6.1)
 
 By default the plugin will check for all the future imports but with
 ``--ignore`` it's possible to define which imports from ``__future__`` are
@@ -64,9 +64,8 @@ This module adds one parameter:
   strings (and by extension docstrings). Corresponds to ``require-code = True``
   in the ``tox.ini``.
 * ``--min-version``: Define the minimum version supported by the project. Any
-  features already mandatory are ignored then by default. Additionally features
-  not available in that version will be forbidden by default. Corresponds to
-  ``min-version = …`` in the ``tox.ini``.
+  features already mandatory or not available won't cause a warning when they
+  are missing. Corresponds to ``min-version = …`` in the ``tox.ini``.
 
 The stand alone version also mimics flake8's ignore parameter.
 
@@ -131,6 +130,12 @@ cannot skip reporting those imports.
 
 Changes
 -------
+
+0.4.1 - 2016-05-30
+``````````````````
+* Do not ignore imports which are present and have been added after the minimum
+  version
+* Ignore imports which became mandatory with the minimum version
 
 0.4.0 - 2016-05-30
 ``````````````````
