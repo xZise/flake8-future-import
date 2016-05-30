@@ -12,7 +12,7 @@ try:
 except ImportError as e:
     argparse = e
 
-from ast import NodeVisitor, PyCF_ONLY_AST, Str, Module
+from ast import NodeVisitor, Str, Module, parse
 
 __version__ = '0.4.0.dev1'
 
@@ -196,7 +196,7 @@ def main(args):
         ignored = set()
     for filename in args.files:
         with open(filename, 'rb') as f:
-            tree = compile(f.read(), filename, 'exec', PyCF_ONLY_AST)
+            tree = parse(f.read(), filename=filename, mode='exec')
         for line, char, msg, checker in FutureImportChecker(tree,
                                                             filename).run():
             if msg[:4] not in ignored:
