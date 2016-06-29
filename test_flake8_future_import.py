@@ -285,7 +285,7 @@ class Flake8TestCase(TestCaseBase):
     def run_flake8(self, *imported):
         code = generate_code(*imported)
         code = '#!/usr/bin/python\n# -*- coding: utf-8 -*-\n' + code
-        handle, tmp_file = tempfile.mkstemp()
+        handle, tmp_file = tempfile.mkstemp(suffix='.py')
         try:
             with codecs.open(tmp_file, 'w', 'utf-8') as f:
                 f.write(code)
