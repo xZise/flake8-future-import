@@ -46,20 +46,21 @@ class TestCaseBase(unittest.TestCase):
         for line, msg in iterator:
             match = re.match(r'FI(\d\d) __future__ import "([^"]+)" '
                              r'(missing|present|does not exist)', msg)
-            self.assertIsNotNone(match, 'Line "{0}" did not match.'.format(msg))
-            code = int(match.group(1))
-            if code < 90:
-                self.assertIs(10 <= code < 50, match.group(3) == 'missing')
-                imp = flake8_future_import.ALL_FEATURES[(code - 10) % 40].name
-                self.assertEqual(match.group(2), imp)
-                if code < 50:
-                    found_missing.add(imp)
-                    self.assertEqual(line, 1)
+            # Ignore all errors which aren't from this plugin
+            if match is not None:
+                code = int(match.group(1))
+                if code < 90:
+                    self.assertIs(10 <= code < 50, match.group(3) == 'missing')
+                    imp = flake8_future_import.ALL_FEATURES[(code - 10) % 40].name
+                    self.assertEqual(match.group(2), imp)
+                    if code < 50:
+                        found_missing.add(imp)
+                        self.assertEqual(line, 1)
+                    else:
+                        found_forbidden.add(imp)
                 else:
-                    found_forbidden.add(imp)
-            else:
-                self.assertEqual(code, 90)
-                found_invalid.add(match.group(2))
+                    self.assertEqual(code, 90)
+                    found_invalid.add(match.group(2))
         self.assertFalse(found_missing & found_forbidden)
         self.assertFalse(found_missing & found_invalid)
         self.assertFalse(found_forbidden & found_invalid)
