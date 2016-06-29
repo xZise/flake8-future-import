@@ -254,7 +254,9 @@ class Flake8TestCase(TestCaseBase):
                 output = subprocess.check_output(['python', 'setup.py',
                                                   'develop'])
                 output = output.decode('utf8')
-                print('Installed package:\n\n' + output)
+                # Indent output by one tab to hightlight where it is
+                output = re.sub('^(?!\s)', '\t', output, flags=re.M)
+                print('Installed package:\n\n' + output + '\n\n')
                 cls._installed = True
             else:
                 raise unittest.SkipTest('The plugin is not installed and '
