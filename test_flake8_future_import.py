@@ -11,6 +11,8 @@ import subprocess
 import sys
 import tempfile
 
+from distutils.version import StrictVersion
+
 if sys.version_info < (2, 7):
     import unittest2 as unittest
 else:
@@ -84,12 +86,13 @@ class TestCaseBase(unittest.TestCase):
             self.assertEqual(char, 0)
             self.assertIs(origin, flake8_future_import.FutureImportChecker)
 
-    def reverse_parse(self, lines, tmp_file=None):
+    def reverse_parse(self, lines, expected_offset, tmp_file=None):
         for line in lines:
-            match = re.match(r'([^:]+):(\d+):1: (.*)', line)
-            yield int(match.group(2)), match.group(3)
+            match = re.match(r'([^:]+):(\d+):(\d+): (.*)', line)
+            yield int(match.group(2)), match.group(4)
             if tmp_file is not None:
                 self.assertEqual(match.group(1), tmp_file)
+            self.assertEqual(int(match.group(3)), expected_offset)
 
 
 class SimpleImportTestCase(TestCaseBase):
@@ -169,7 +172,7 @@ class TestMainPrintPatched(TestCaseBase):
             flake8_future_import.main([tmp_file])
         finally:
             os.remove(tmp_file)
-        self.run_test(self.reverse_parse(self.messages), imported)
+        self.run_test(self.reverse_parse(self.messages, 0), imported)
 
     def test_main(self):
         self.run_main()
@@ -260,6 +263,14 @@ class Flake8TestCase(TestCaseBase):
             else:
                 raise unittest.SkipTest('The plugin is not installed and '
                                         'TEST_FLAKE8_INSTALL not set')
+        # Determine version of installed flake8 package
+        for dist in pip.utils.get_installed_distributions(False):
+            if dist.key == 'flake8':
+                version = StrictVersion(dist.version)
+                cls.expected_offset = 0 if version.version[0] >= 3 else 1
+                break
+        else:
+            raise ValueError('Unable to find Flake8 installation')
         super(Flake8TestCase, cls).setUpClass()
 
     @classmethod
@@ -288,8 +299,11 @@ class Flake8TestCase(TestCaseBase):
             os.close(handle)
             os.remove(tmp_file)
         self.assertFalse(data_err)
-        self.run_test(self.reverse_parse(data_out.decode('utf8').splitlines(), tmp_file),
-                      imported)
+        self.run_test(
+            self.reverse_parse(data_out.decode('utf8').splitlines(),
+                               self.expected_offset,
+                               tmp_file),
+            imported)
         self.assertEqual(p.returncode, 1)
 
     def test_flake8(self):
