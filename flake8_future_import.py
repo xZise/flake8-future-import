@@ -3,6 +3,7 @@
 """Extension for flake8 to test for certain __future__ imports"""
 from __future__ import print_function
 
+import optparse
 import sys
 
 from collections import namedtuple
@@ -14,7 +15,7 @@ except ImportError as e:
 
 from ast import NodeVisitor, Str, Module, parse
 
-__version__ = '0.4.1'
+__version__ = '0.4.2.dev1'
 
 
 class FutureImportVisitor(NodeVisitor):
@@ -48,14 +49,15 @@ class Flake8Argparse(object):
     def add_options(cls, parser):
         class Wrapper(object):
             def add_argument(self, *args, **kwargs):
-                # flake8 uses config_options to handle stuff like 'store_true'
-                for opt in args:
-                    if opt.startswith('--'):
-                        break
-                else:
-                    opt = args[0]
-                parser.config_options.append(opt.lstrip('-'))
-                parser.add_option(*args, **kwargs)
+                kwargs.setdefault('parse_from_config', True)
+                try:
+                    parser.add_option(*args, **kwargs)
+                except (optparse.OptionError, TypeError):
+                    use_config = kwargs.pop('parse_from_config')
+                    option = parser.add_option(*args, **kwargs)
+                    if use_config:
+                        # flake8 2.X uses config_options to handle stuff like 'store_true'
+                        parser.config_options.append(option.dest)
 
         cls.add_arguments(Wrapper())
 
