@@ -1,7 +1,7 @@
 __future__ import checker
 =========================
 
-.. image:: https://secure.travis-ci.org/xZise/flake8-future-import.png?branch=0.4.2
+.. image:: https://secure.travis-ci.org/xZise/flake8-future-import.png?branch=0.4.3
    :alt: Build Status
    :target: https://travis-ci.org/xZise/flake8-future-import
 
@@ -43,7 +43,7 @@ When both ``flake8 2.0`` and ``flake8-future-imports`` are installed, the plugin
 is available in ``flake8``::
 
   $ flake8 --version
-  2.0 (pep8: 1.4.2, flake8-future-imports: 0.4.2, pyflakes: 0.6.1)
+  2.0 (pep8: 1.4.2, flake8-future-imports: 0.4.3, pyflakes: 0.6.1)
 
 By default the plugin will check for all the future imports but with
 ``--ignore`` it's possible to define which imports from ``__future__`` are
@@ -130,6 +130,11 @@ cannot skip reporting those imports.
 
 Changes
 -------
+
+0.4.3 - 2016-07-01
+``````````````````
+* Restore old option name behaviour that an option like `min-version` in the
+  tox.ini is recognized.
 
 0.4.2 - 2016-07-01
 ``````````````````
