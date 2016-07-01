@@ -57,7 +57,7 @@ class Flake8Argparse(object):
                     option = parser.add_option(*args, **kwargs)
                     if use_config:
                         # flake8 2.X uses config_options to handle stuff like 'store_true'
-                        parser.config_options.append(option.dest)
+                        parser.config_options.append(option.get_opt_string().lstrip('-'))
 
         cls.add_arguments(Wrapper())
 
