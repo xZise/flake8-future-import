@@ -16,7 +16,7 @@ notifications:
 before_install:
   - pip install codecov
   - mkdir bad_tests
-  - wget https://hg.python.org/cpython/archive/tip.tar.bz2/Lib/test/ -O bad_tests/test.tar.bz2
+  - wget https://hg.python.org/cpython/archive/3.6.tar.bz2/Lib/test/ -O bad_tests/test.tar.bz2
   - tar -xjf bad_tests/test.tar.bz2 -C bad_tests/
   - mv bad_tests/cpython-*/Lib/test/badsyntax_future* . -v
   - rm -r bad_tests/
