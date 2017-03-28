@@ -321,6 +321,9 @@ class FeaturesMetaClass(type):
     def __new__(cls, name, bases, dct):
         def create_existing_test(feat_name):
             def test(self):
+                if feat_name == 'absolute_import' and sys.version_info < (2, 7, 5):
+                    raise unittest.SkipTest('https://bugs.python.org/issue14494')
+
                 self.assertIn(feat_name, flake8_future_import.FEATURES)
                 py_feat = getattr(__future__, feat_name)
                 my_feat = flake8_future_import.FEATURES[feat_name]
