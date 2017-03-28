@@ -204,7 +204,7 @@ def main(args):
                                                             filename).run():
             if msg[:4] not in ignored:
                 has_errors = True
-                print('{0}:{1}:{2}: {3}'.format(filename, line, char, msg))
+                print('{0}:{1}:{2}: {3}'.format(filename, line, char + 1, msg))
     return has_errors
 
 
