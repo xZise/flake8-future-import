@@ -118,21 +118,15 @@ class SimpleImportTestCase(TestCaseBase):
 
 class MinVersionTestCase(TestCaseBase):
 
-    @classmethod
-    def setUpClass(cls):
-        super(MinVersionTestCase, cls).setUpClass()
-        cls._min_version = flake8_future_import.FutureImportChecker.min_version
-
-    @classmethod
-    def tearDownClass(cls):
-        flake8_future_import.FutureImportChecker.min_version = cls._min_version
-        super(MinVersionTestCase, cls).tearDownClass()
-
     def run_checker(self, min_version, ignored, *imported):
         tree = ast.parse(generate_code(*imported))
-        flake8_future_import.FutureImportChecker.min_version = min_version
-        checker = flake8_future_import.FutureImportChecker(tree, 'fn')
-        self.run_test(self.iterator(checker), imported, ignore_missing=ignored)
+        old_min = flake8_future_import.FutureImportChecker.min_version
+        try:
+            flake8_future_import.FutureImportChecker.min_version = min_version
+            checker = flake8_future_import.FutureImportChecker(tree, 'fn')
+            self.run_test(self.iterator(checker), imported, ignore_missing=ignored)
+        finally:
+            flake8_future_import.FutureImportChecker.min_version = old_min
 
     def test_mandatory_and_unavailable(self):
         """Do not care about already mandatory or not yet available features."""
