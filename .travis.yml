@@ -1,5 +1,6 @@
 language: python
 python:
+  - "2.6"
   - "2.7"
   - "3.3"
   - "3.4"
@@ -8,6 +9,8 @@ python:
 
 script:
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.6" ]]; then pip install unittest2 ; fi
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.6" ]]; then pip install flake8==2.6.2 ; fi
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.3" ]]; then pip install flake8==2.6.2 ; fi
   - python setup.py test
   - if [[ "$TRAVIS_PYTHON_VERSION" != "nightly" ]]; then coverage run setup.py test ; fi
 

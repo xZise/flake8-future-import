@@ -115,21 +115,15 @@ class SimpleImportTestCase(TestCaseBase):
 
 class MinVersionTestCase(TestCaseBase):
 
-    @classmethod
-    def setUpClass(cls):
-        super(MinVersionTestCase, cls).setUpClass()
-        cls._min_version = flake8_future_import.FutureImportChecker.min_version
-
-    @classmethod
-    def tearDownClass(cls):
-        flake8_future_import.FutureImportChecker.min_version = cls._min_version
-        super(MinVersionTestCase, cls).tearDownClass()
-
     def run_checker(self, min_version, ignored, *imported):
         tree = ast.parse(generate_code(*imported))
-        flake8_future_import.FutureImportChecker.min_version = min_version
-        checker = flake8_future_import.FutureImportChecker(tree, 'fn')
-        self.run_test(self.iterator(checker), imported, ignore_missing=ignored)
+        old_min = flake8_future_import.FutureImportChecker.min_version
+        try:
+            flake8_future_import.FutureImportChecker.min_version = min_version
+            checker = flake8_future_import.FutureImportChecker(tree, 'fn')
+            self.run_test(self.iterator(checker), imported, ignore_missing=ignored)
+        finally:
+            flake8_future_import.FutureImportChecker.min_version = old_min
 
     def test_mandatory_and_unavailable(self):
         """Do not care about already mandatory or not yet available features."""
@@ -307,6 +301,9 @@ class FeaturesMetaClass(type):
     def __new__(cls, name, bases, dct):
         def create_existing_test(feat_name):
             def test(self):
+                if feat_name == 'absolute_import' and sys.version_info < (2, 7, 5):
+                    raise unittest.SkipTest('https://bugs.python.org/issue14494')
+
                 self.assertIn(feat_name, flake8_future_import.FEATURES)
                 py_feat = getattr(__future__, feat_name)
                 my_feat = flake8_future_import.FEATURES[feat_name]
