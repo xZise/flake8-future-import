@@ -1,7 +1,7 @@
 __future__ import checker
 =========================
 
-.. image:: https://secure.travis-ci.org/xZise/flake8-future-import.png?branch=0.4.3
+.. image:: https://secure.travis-ci.org/xZise/flake8-future-import.png?branch=0.4.4
    :alt: Build Status
    :target: https://travis-ci.org/xZise/flake8-future-import
 
@@ -130,6 +130,10 @@ cannot skip reporting those imports.
 
 Changes
 -------
+
+0.4.4 - 2018-01-05
+``````````````````
+* Add `Flake8` framework classifier.
 
 0.4.3 - 2016-07-01
 ``````````````````
