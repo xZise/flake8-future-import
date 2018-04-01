@@ -116,7 +116,7 @@ This plugin is using the following error codes:
 For a sensible usage, for each import either or both error code need to be
 ignored as it will otherwise always complain either because it's present or
 because it is not. The corresponding other error code can be determined by
-adding or substracting 40.
+adding or subtracting 40.
 
 * Ignoring the **lower** one will **forbid** the import
 * Ignoring the **higher** one will **require** the import
