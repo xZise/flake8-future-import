@@ -13,29 +13,61 @@ try:
 except ImportError as e:
     argparse = e
 
-from ast import NodeVisitor, Str, Module, parse
+import ast
 
 __version__ = '0.4.4'
 
 
-class FutureImportVisitor(NodeVisitor):
+class FutureImportVisitor(ast.NodeVisitor):
 
     def __init__(self):
         super(FutureImportVisitor, self).__init__()
         self.future_imports = []
+
         self._uses_code = False
+        self._uses_print = False
+        self._uses_division = False
+        self._uses_import = False
+        self._uses_str_literals = False
+        self._uses_generators = False
+        self._uses_with = False
+
+    def _is_print(self, node):
+        # python 2
+        if hasattr(ast, 'Print') and isinstance(node, ast.Print):
+            return True
+
+        # python 3
+        if isinstance(node, ast.Call) and \
+           isinstance(node.func, ast.Name) and \
+           node.func.id == 'print':
+            return True
+
+        return False
 
     def visit_ImportFrom(self, node):
         if node.module == '__future__':
             self.future_imports += [node]
-
-    def visit_Expr(self, node):
-        if not isinstance(node.value, Str) or node.value.col_offset != 0:
-            self._uses_code = True
+        else:
+            self._uses_import = True
 
     def generic_visit(self, node):
-        if not isinstance(node, Module):
+        if not isinstance(node, ast.Module):
             self._uses_code = True
+
+        if isinstance(node, ast.Str):
+            self._uses_str_literals = True
+        elif self._is_print(node):
+            self._uses_print = True
+        elif isinstance(node, ast.Div):
+            self._uses_division = True
+        elif isinstance(node, ast.Import):
+            self._uses_import = True
+        elif isinstance(node, ast.With):
+            self._uses_with = True
+        elif isinstance(node, ast.Yield):
+            self._uses_generators = True
+
         super(FutureImportVisitor, self).generic_visit(node)
 
     @property
@@ -94,6 +126,7 @@ class FutureImportChecker(Flake8Argparse):
     name = 'flake8-future-import'
     require_code = True
     min_version = False
+    require_used = False
 
     def __init__(self, tree, filename):
         self.tree = tree
@@ -106,6 +139,8 @@ class FutureImportChecker(Flake8Argparse):
         parser.add_argument('--min-version', default=False,
                             help='The minimum version supported so that it can '
                                  'ignore mandatory and non-existent features')
+        parser.add_argument('--require-used', action='store_true',
+                            help='Only alert when relevant features are used')
 
     @classmethod
     def parse_options(cls, options):
@@ -122,6 +157,7 @@ class FutureImportChecker(Flake8Argparse):
                                  'like "A.B.C"'.format(options.min_version))
             min_version += (0, ) * (max(3 - len(min_version), 0))
         cls.min_version = min_version
+        cls.require_used = options.require_used
 
     def _generate_error(self, future_import, lineno, present):
         feature = FEATURES.get(future_import)
@@ -156,10 +192,31 @@ class FutureImportChecker(Flake8Argparse):
                     yield err
                 present.add(alias.name)
         for name in FEATURES:
-            if name not in present:
-                err = self._generate_error(name, 1, False)
-                if err:
-                    yield err
+            if name in present:
+                continue
+
+            if self.require_used:
+                if name == 'print_function' and not visitor._uses_print:
+                    continue
+
+                if name == 'division' and not visitor._uses_division:
+                    continue
+
+                if name == 'absolute_import' and not visitor._uses_import:
+                    continue
+
+                if name == 'unicode_literals' and not visitor._uses_str_literals:
+                    continue
+
+                if name == 'generators' and not visitor._uses_generators:
+                    continue
+
+                if name == 'with_statement' and not visitor._uses_with:
+                    continue
+
+            err = self._generate_error(name, 1, False)
+            if err:
+                yield err
 
 
 def main(args):
@@ -199,7 +256,7 @@ def main(args):
     has_errors = False
     for filename in args.files:
         with open(filename, 'rb') as f:
-            tree = parse(f.read(), filename=filename, mode='exec')
+            tree = ast.parse(f.read(), filename=filename, mode='exec')
         for line, char, msg, checker in FutureImportChecker(tree,
                                                             filename).run():
             if msg[:4] not in ignored:
