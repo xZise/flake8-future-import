@@ -5,7 +5,7 @@ import ast
 import codecs
 import itertools
 import os
-import pip
+import pkg_resources
 import re
 import subprocess
 import sys
@@ -242,7 +242,7 @@ class Flake8TestCase(TestCaseBase):
 
     @classmethod
     def setUpClass(cls):
-        for dist in pip.utils.get_installed_distributions():
+        for dist in pkg_resources.working_set:
             if dist.key == 'flake8-future-import':
                 if dist.location != os.path.dirname(os.path.abspath(__file__)):
                     raise unittest.SkipTest('The plugin is already installed '

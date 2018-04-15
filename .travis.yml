@@ -7,7 +7,14 @@ python:
   - "3.6"
   - "nightly"
 
+matrix:
+  include:
+  - python: "3.5"
+    env: NEW_PIP=1
+
 script:
+  # Upgrade to at least pip 10, to test against that as well
+  - if [[ "$NEW_PIP" ]]; then pip install --upgrade "pip>=10" a; fi
   # Flake8 requires setuptools > 30, but some preinstalled are to old for that
   - pip install --upgrade setuptools
   - python setup.py test
@@ -16,7 +23,7 @@ script:
 notifications:
   email: false
 before_install:
-  - pip install codecov
+  - pip install codecov flake8
   - mkdir bad_tests
   - wget https://hg.python.org/cpython/archive/3.6.tar.bz2/Lib/test/ -O bad_tests/test.tar.bz2
   - tar -xjf bad_tests/test.tar.bz2 -C bad_tests/
