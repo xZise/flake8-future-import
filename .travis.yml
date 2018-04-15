@@ -8,7 +8,6 @@ python:
   - "nightly"
 
 script:
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.6" ]]; then pip install unittest2 ; fi
   # Flake8 requires setuptools > 30, but some preinstalled are to old for that
   - pip install --upgrade setuptools
   - python setup.py test
