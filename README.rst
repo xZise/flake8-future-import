@@ -134,16 +134,17 @@ Changes
 0.4.5 - 2018-04-15
 ``````````````````
 * Support pip version 10 in the tests.
-* Add `LICENSE` and `test_flake8_future_import.py` to the source distribution.
+* Add ``LICENSE`` and ``test_flake8_future_import.py`` to the source
+  distribution.
 
 0.4.4 - 2018-01-05
 ``````````````````
-* Add `Flake8` framework classifier.
+* Add ``Flake8`` framework classifier.
 
 0.4.3 - 2016-07-01
 ``````````````````
-* Restore old option name behaviour that an option like `min-version` in the
-  tox.ini is recognized.
+* When using Flake8 version 2, it wasn't correctly looking for the options in
+  the ``tox.ini`` file. This is restoring the old behaviour there.
 
 0.4.2 - 2016-07-01
 ``````````````````
