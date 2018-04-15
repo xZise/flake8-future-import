@@ -11,7 +11,7 @@ script:
   # Flake8 requires setuptools > 30, but some preinstalled are to old for that
   - pip install --upgrade setuptools
   - python setup.py test
-  - if [[ "$TRAVIS_PYTHON_VERSION" != "nightly" ]]; then coverage run setup.py test ; fi
+  - coverage run setup.py test
 
 notifications:
   email: false
