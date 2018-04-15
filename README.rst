@@ -1,7 +1,7 @@
 __future__ import checker
 =========================
 
-.. image:: https://secure.travis-ci.org/xZise/flake8-future-import.png?branch=0.4.4
+.. image:: https://secure.travis-ci.org/xZise/flake8-future-import.png?branch=0.4.5
    :alt: Build Status
    :target: https://travis-ci.org/xZise/flake8-future-import
 
@@ -130,6 +130,11 @@ cannot skip reporting those imports.
 
 Changes
 -------
+
+0.4.5 - 2018-04-15
+``````````````````
+* Support pip version 10 in the tests.
+* Add `LICENSE` and `test_flake8_future_import.py` to the source distribution.
 
 0.4.4 - 2018-01-05
 ``````````````````
