@@ -230,7 +230,7 @@ class TestBadSyntax(TestCaseBase):
     """Test using various bad syntax examples from Python's library."""
 
 
-@unittest.skipIf(sys.version_info[:2] >= (3, 6), 'flake8 does not support 3.6')
+@unittest.skipIf(sys.version_info[:2] >= (3, 7), 'flake8 supports up to 3.6')
 class Flake8TestCase(TestCaseBase):
 
     """
