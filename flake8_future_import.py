@@ -123,7 +123,7 @@ class FutureImportChecker(Flake8Argparse):
             min_version += (0, ) * (max(3 - len(min_version), 0))
         cls.min_version = min_version
 
-    def _generate_error(self, future_import, lineno, present):
+    def _generate_error(self, future_import, present):
         feature = FEATURES.get(future_import)
         if feature is None:
             code = 90
@@ -141,7 +141,7 @@ class FutureImportChecker(Flake8Argparse):
             else:
                 msg = 'missing'
         msg = 'FI{0} __future__ import "{1}" ' + msg
-        return lineno, 0, msg.format(code, future_import), type(self)
+        return msg.format(code, future_import)
 
     def run(self):
         visitor = FutureImportVisitor()
@@ -151,15 +151,15 @@ class FutureImportChecker(Flake8Argparse):
         present = set()
         for import_node in visitor.future_imports:
             for alias in import_node.names:
-                err = self._generate_error(alias.name, import_node.lineno, True)
+                err = self._generate_error(alias.name, True)
                 if err:
-                    yield err
+                    yield import_node.lineno, 0, err, type(self)
                 present.add(alias.name)
         for name in FEATURES:
             if name not in present:
-                err = self._generate_error(name, 1, False)
+                err = self._generate_error(name, False)
                 if err:
-                    yield err
+                    yield 1, 0, err, type(self)
 
 
 def main(args):
