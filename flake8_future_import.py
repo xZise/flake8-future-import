@@ -76,11 +76,12 @@ UNICODE_LITERALS = Feature(4, 'unicode_literals', (2, 6, 0), (3, 0, 0))
 GENERATOR_STOP = Feature(5, 'generator_stop', (3, 5, 0), (3, 7, 0))
 NESTED_SCOPES = Feature(6, 'nested_scopes', (2, 1, 0), (2, 2, 0))
 GENERATORS = Feature(7, 'generators', (2, 2, 0), (2, 3, 0))
+ANNOTATIONS = Feature(8, 'annotations', (3, 7, 0), (4, 0, 0))
 
 
 # Order important as it defines the error code
 ALL_FEATURES = (DIVISION, ABSOLUTE_IMPORT, WITH_STATEMENT, PRINT_FUNCTION,
-                UNICODE_LITERALS, GENERATOR_STOP, NESTED_SCOPES, GENERATORS)
+                UNICODE_LITERALS, GENERATOR_STOP, NESTED_SCOPES, GENERATORS, ANNOTATIONS)
 FEATURES = dict((feature.name, feature) for feature in ALL_FEATURES)
 FEATURE_NAMES = frozenset(feature.name for feature in ALL_FEATURES)
 # Make sure the features aren't messed up

@@ -135,14 +135,14 @@ class MinVersionTestCase(TestCaseBase):
         """Do not care about already mandatory or not yet available features."""
         self.run_checker(
             (2, 6, 0),
-            set(['nested_scopes', 'generators', 'with_statement', 'generator_stop']),
+            set(['nested_scopes', 'generators', 'with_statement', 'generator_stop', 'annotations']),
             ('unicode_literals', ))
 
     def test_use_of_unavailable(self):
         """Use an import which is to new for the minimum version."""
         self.run_checker(
             (2, 6, 0),
-            set(['nested_scopes', 'generators', 'with_statement']),
+            set(['nested_scopes', 'generators', 'with_statement', 'annotations']),
             ('generator_stop', ))
 
 
