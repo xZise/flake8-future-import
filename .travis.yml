@@ -1,7 +1,6 @@
 language: python
 python:
   - "2.7"
-  - "3.3"
   - "3.4"
   - "3.5"
   - "3.6"
@@ -11,12 +10,15 @@ matrix:
   include:
   - python: "3.5"
     env: NEW_PIP=1
+  - python: "3.3"
+    env: ST_VER="==39.2.0"
 
 script:
   # Upgrade to at least pip 10, to test against that as well
   - if [[ "$NEW_PIP" ]]; then pip install --upgrade "pip>=10" a; fi
   # Flake8 requires setuptools > 30, but some preinstalled are to old for that
-  - pip install --upgrade setuptools
+  # Now 3.3 is not supported anymore, so use version 39.2.0 only there
+  - pip install --upgrade setuptools$ST_VER
   - python setup.py test
   - coverage run setup.py test
 
