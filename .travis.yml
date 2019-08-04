@@ -24,10 +24,10 @@ notifications:
   email: false
 before_install:
   - pip install codecov flake8
-  - mkdir bad_tests
-  - wget https://hg.python.org/cpython/archive/3.6.tar.bz2/Lib/test/ -O bad_tests/test.tar.bz2
-  - tar -xjf bad_tests/test.tar.bz2 -C bad_tests/
-  - mv bad_tests/cpython-*/Lib/test/badsyntax_future* . -v
-  - rm -r bad_tests/
+  - |
+    for i in 3 4 5 6 7 8 9 10
+    do
+        wget https://hg.python.org/cpython/raw-file/v3.6.0/Lib/test/badsyntax_future$i.py -O badsyntax_future$i.py
+    done
 after_success:
   - codecov
