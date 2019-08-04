@@ -1,7 +1,7 @@
 __future__ import checker
 =========================
 
-.. image:: https://secure.travis-ci.org/xZise/flake8-future-import.png?branch=0.4.5
+.. image:: https://secure.travis-ci.org/xZise/flake8-future-import.png?branch=0.4.6
    :alt: Build Status
    :target: https://travis-ci.org/xZise/flake8-future-import
 
@@ -43,7 +43,7 @@ When both ``flake8 2.0`` and ``flake8-future-imports`` are installed, the plugin
 is available in ``flake8``::
 
   $ flake8 --version
-  3.5.0 (flake8-future-imports: 0.4.5, mccabe: 0.6.1, pycodestyle: 2.3.1, pyflakes: 1.6.0)
+  3.5.0 (flake8-future-imports: 0.4.6, mccabe: 0.6.1, pycodestyle: 2.3.1, pyflakes: 1.6.0)
 
 By default the plugin will check for all the future imports but with
 ``--ignore`` it's possible to define which imports from ``__future__`` are
@@ -92,6 +92,8 @@ This plugin is using the following error codes:
 +------+--------------------------------------------------+
 | FI17 | ``__future__`` import "generators" missing       |
 +------+--------------------------------------------------+
+| FI12 | ``__future__`` import "annotations" missing      |
++------+--------------------------------------------------+
 +------+--------------------------------------------------+
 | FI50 | ``__future__`` import "division" present         |
 +------+--------------------------------------------------+
@@ -108,6 +110,8 @@ This plugin is using the following error codes:
 | FI56 | ``__future__`` import "nested_scopes" present    |
 +------+--------------------------------------------------+
 | FI57 | ``__future__`` import "generators" present       |
++------+--------------------------------------------------+
+| FI58 | ``__future__`` import "annotations" present      |
 +------+--------------------------------------------------+
 +------+--------------------------------------------------+
 | FI90 | ``__future__`` import does not exist             |
@@ -130,6 +134,10 @@ cannot skip reporting those imports.
 
 Changes
 -------
+
+0.4.6 - 2019-08-04
+``````````````````
+* Add new ``annotations`` feature.
 
 0.4.5 - 2018-04-15
 ``````````````````

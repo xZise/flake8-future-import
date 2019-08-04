@@ -15,7 +15,7 @@ except ImportError as e:
 
 from ast import NodeVisitor, Str, Module, parse
 
-__version__ = '0.4.5'
+__version__ = '0.4.6'
 
 
 class FutureImportVisitor(NodeVisitor):
