@@ -92,7 +92,7 @@ This plugin is using the following error codes:
 +------+--------------------------------------------------+
 | FI17 | ``__future__`` import "generators" missing       |
 +------+--------------------------------------------------+
-| FI12 | ``__future__`` import "annotations" missing      |
+| FI18 | ``__future__`` import "annotations" missing      |
 +------+--------------------------------------------------+
 +------+--------------------------------------------------+
 | FI50 | ``__future__`` import "division" present         |
