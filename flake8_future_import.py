@@ -156,14 +156,16 @@ class FutureImportChecker(Flake8Argparse):
                 if err:
                     yield import_node.lineno, 0, err, type(self)
                 present.add(alias.name)
-        for name in FEATURES:
-            if name not in present:
-                err = self._generate_error(name, False)
-                if err:
-                    if len(self.tree.body) > 0 and self.tree.body[0].lineno > 1:
-                        yield self.tree.body[0].lineno - 1, 0, err, type(self)
-                    else:
-                        yield 1, 0, err, type(self)
+
+        for name in FEATURE_NAMES - present:
+            err = self._generate_error(name, False)
+            if not err:
+                continue
+
+            if len(self.tree.body) > 0 and self.tree.body[0].lineno > 1:
+                yield self.tree.body[0].lineno - 1, 0, err, type(self)
+            else:
+                yield 1, 0, err, type(self)
 
 
 def main(args):
