@@ -160,7 +160,10 @@ class FutureImportChecker(Flake8Argparse):
             if name not in present:
                 err = self._generate_error(name, False)
                 if err:
-                    yield 1, 0, err, type(self)
+                    if len(self.tree.body) > 0 and self.tree.body[0].lineno > 1:
+                        yield self.tree.body[0].lineno - 1, 0, err, type(self)
+                    else:
+                        yield 1, 0, err, type(self)
 
 
 def main(args):
