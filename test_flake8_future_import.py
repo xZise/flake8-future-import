@@ -53,7 +53,6 @@ class TestCaseBase(unittest.TestCase):
                     self.assertEqual(match.group(2), imp)
                     if code < 50:
                         found_missing.add(imp)
-                        self.assertEqual(line, 1)
                     else:
                         found_forbidden.add(imp)
                 else:
