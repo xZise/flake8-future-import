@@ -86,8 +86,11 @@ class TestCaseBase(unittest.TestCase):
             self.assertIs(origin, flake8_future_import.FutureImportChecker)
 
     def reverse_parse(self, lines, tmp_file=None):
-        for line in lines:
+        for lineno, line in enumerate(lines, start=1):
             match = re.match(r'((?:[A-Z]:)?[^:]+):(\d+):1: (.*)', line)
+            if match is None:
+                text: str = '\n'.join(lines)
+                raise ValueError(f'Line {lineno} ({line}) cannot be matched: {text}')
             yield int(match.group(2)), match.group(3)
             if tmp_file is not None:
                 self.assertEqual(match.group(1), tmp_file)
