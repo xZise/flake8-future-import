@@ -1,9 +1,9 @@
 __future__ import checker
 =========================
 
-.. image:: https://secure.travis-ci.org/xZise/flake8-future-import.png?branch=0.4.6
+.. image:: https://github.com/xZise/flake8-future-import/actions/workflows/main.yml/badge.svg?branch=master
    :alt: Build Status
-   :target: https://travis-ci.org/xZise/flake8-future-import
+   :target: https://github.com/xZise/flake8-future-import/actions
 
 .. image:: https://codecov.io/gh/xZise/flake8-future-import/branch/master/graph/badge.svg
    :alt: Coverage Status
@@ -39,11 +39,11 @@ is using ``argparse``.
 Plugin for Flake8
 -----------------
 
-When both ``flake8 2.0`` and ``flake8-future-imports`` are installed, the plugin
+When both ``flake8`` and ``flake8-future-imports`` are installed, the plugin
 is available in ``flake8``::
 
   $ flake8 --version
-  3.5.0 (flake8-future-imports: 0.4.6, mccabe: 0.6.1, pycodestyle: 2.3.1, pyflakes: 1.6.0)
+  5.0.3 (flake8-future-import: 0.4.6, mccabe: 0.7.0, pycodestyle: 2.9.0, pyflakes: 2.5.0) CPython 3.9.5 on Windows
 
 By default the plugin will check for all the future imports but with
 ``--ignore`` it's possible to define which imports from ``__future__`` are
@@ -134,6 +134,10 @@ cannot skip reporting those imports.
 
 Changes
 -------
+
+0.4.7 - 2022-08-02
+``````````````````
+* Fix error reported with flake8 version 5
 
 0.4.6 - 2019-08-04
 ``````````````````
