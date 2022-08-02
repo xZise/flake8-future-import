@@ -7,6 +7,7 @@ import optparse
 import sys
 
 from collections import namedtuple
+from typing import Optional
 
 try:
     import argparse
@@ -121,10 +122,17 @@ class FutureImportChecker(Flake8Argparse):
             if min_version is None or len(min_version) > 3:
                 raise ValueError('Minimum version "{0}" not formatted '
                                  'like "A.B.C"'.format(options.min_version))
+            # Ensure that min_version is a tuple of length 3
             min_version += (0, ) * (max(3 - len(min_version), 0))
         cls.min_version = min_version
 
-    def _generate_error(self, future_import, present):
+    def _generate_error(self, future_import: str, present: bool) -> Optional[str]:
+        """Checks whether the import is an error and returns it.
+
+        :param future_import: The name of the future import (e.g. "annotations")
+        :param present: Whether the import is present
+        :return: An error message if the combination is one or None otherwise
+        """
         feature = FEATURES.get(future_import)
         if feature is None:
             code = 90
