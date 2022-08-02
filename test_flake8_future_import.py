@@ -230,7 +230,6 @@ class TestBadSyntax(TestCaseBase):
     """Test using various bad syntax examples from Python's library."""
 
 
-@unittest.skipIf(sys.version_info[:2] >= (3, 7), 'flake8 supports up to 3.6')
 class Flake8TestCase(TestCaseBase):
 
     """
@@ -244,7 +243,7 @@ class Flake8TestCase(TestCaseBase):
     def setUpClass(cls):
         for dist in pkg_resources.working_set:
             if dist.key == 'flake8-future-import':
-                if dist.location != os.path.dirname(os.path.abspath(__file__)):
+                if not os.path.samefile(dist.location, os.path.dirname(os.path.abspath(__file__))):
                     raise unittest.SkipTest('The plugin is already installed '
                                             'but somewhere else.')
                 cls._installed = False
