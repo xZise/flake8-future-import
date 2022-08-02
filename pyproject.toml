@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flake8-future-import"
+authors = [
+  { name="Fabian Neundorf", email="CommodoreFabianus@gmx.de" },
+]
+description = "__future__ import checker, plugin for flake8"
+readme = "README.rst"
+license = { text="MIT License" }
+requires-python = ">=3.6"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Framework :: Flake8",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [ "flake8" ]
+dynamic = ["version"]
+keywords = ["flake8", "import", "future"]
+
+[tool.setuptools.dynamic]
+version = {attr = "flake8_future_import.__version__"}
+
+[project.entry-points."flake8.extension"]
+FI = "flake8_future_import:FutureImportChecker"
+
+[project.urls]
+"Homepage" = "https://github.com/xZise/flake8-future-import"
+"Bug Tracker" = "https://github.com/xZise/flake8-future-import/issues"
