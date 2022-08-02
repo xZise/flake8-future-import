@@ -87,7 +87,7 @@ class TestCaseBase(unittest.TestCase):
 
     def reverse_parse(self, lines, tmp_file=None):
         for line in lines:
-            match = re.match(r'([^:]+):(\d+):1: (.*)', line)
+            match = re.match(r'((?:[A-Z]:)?[^:]+):(\d+):1: (.*)', line)
             yield int(match.group(2)), match.group(3)
             if tmp_file is not None:
                 self.assertEqual(match.group(1), tmp_file)
@@ -163,12 +163,12 @@ class TestMainPrintPatched(TestCaseBase):
         self.messages = []
         code = generate_code(*imported)
         code = '#!/usr/bin/python\n# -*- coding: utf-8 -*-\n' + code
-        tmp_file = tempfile.mkstemp()[1]
+        handle, tmp_file = tempfile.mkstemp()
         try:
-            with codecs.open(tmp_file, 'w', 'utf-8') as f:
-                f.write(code)
+            os.write(handle, code.encode('utf-8'))
             flake8_future_import.main([tmp_file])
         finally:
+            os.close(handle)
             os.remove(tmp_file)
         self.run_test(self.reverse_parse(self.messages), imported)
 
