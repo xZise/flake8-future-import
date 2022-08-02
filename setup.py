@@ -41,7 +41,7 @@ setup(
     zip_safe=False,
     entry_points={
         'flake8.extension': [
-            'flake8-future-import = flake8_future_import:FutureImportChecker',
+            'FI = flake8_future_import:FutureImportChecker',
         ],
     },
     tests_require=tests_require,
