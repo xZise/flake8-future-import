@@ -307,12 +307,23 @@ class Flake8TestCase(TestCaseBase):
 class FeaturesMetaClass(type):
 
     def __new__(cls, name, bases, dct):
-        def create_existing_test(feat_name):
+        def create_existing_test_optional(feat_name):
             def test(self):
+                """Verify that the optional property matches Python's value."""
                 self.assertIn(feat_name, flake8_future_import.FEATURES)
                 py_feat = getattr(__future__, feat_name)
                 my_feat = flake8_future_import.FEATURES[feat_name]
                 self.assertEqual(my_feat.optional, py_feat.optional[:3])
+            return test
+
+        def create_existing_test_mandatory(feat_name):
+            def test(self):
+                """Verify that the mandatory property matches Python's value."""
+                self.assertIn(feat_name, flake8_future_import.FEATURES)
+                py_feat = getattr(__future__, feat_name)
+                my_feat = flake8_future_import.FEATURES[feat_name]
+                if my_feat is flake8_future_import.ANNOTATIONS:
+                    raise unittest.SkipTest('The annotation __future__ has different mandatory versions')
                 self.assertEqual(my_feat.mandatory, py_feat.mandatory[:3])
             return test
 
@@ -331,9 +342,12 @@ class FeaturesMetaClass(type):
         for feat in __future__.all_feature_names:
             if feat == 'barry_as_FLUFL':
                 continue  # thank you April's Foul
-            test = create_existing_test(feat)
-            test.__name__ = str('test_{0}'.format(feat))
-            test.__doc__ = 'Verify the feature versions.'
+            test = create_existing_test_optional(feat)
+            test.__name__ = str('test_{0}_optional'.format(feat))
+            dct[test.__name__] = test
+
+            test = create_existing_test_mandatory(feat)
+            test.__name__ = str('test_{0}_mandatory'.format(feat))
             dct[test.__name__] = test
 
         for missing_feat in (set(flake8_future_import.FEATURES) -
