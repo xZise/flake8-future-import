@@ -39,7 +39,7 @@ is using ``argparse``.
 Plugin for Flake8
 -----------------
 
-When both ``flake8`` and ``flake8-future-imports`` are installed, the plugin
+When both ``flake8`` and ``flake8-future-import`` are installed, the plugin
 is available in ``flake8``::
 
   $ flake8 --version
